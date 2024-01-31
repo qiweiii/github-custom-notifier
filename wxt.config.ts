@@ -24,6 +24,11 @@ export default defineConfig({
     browser_action: {
       default_icon: "icon/icon-toolbar.png",
     },
-    web_accessible_resources: ["assets/bell.ogg"],
+    web_accessible_resources: [
+      {
+        resources: ["assets/bell.ogg"],
+        matches: ["*://*/*"],
+      },
+    ],
   },
 });
