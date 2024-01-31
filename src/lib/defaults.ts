@@ -1,7 +1,3 @@
-export const notificationReasons = new Map([
-  ["customNotification", "Custom notification"],
-]);
-
 export const errorTitles = new Map([
   [
     "missing token",
@@ -68,10 +64,6 @@ export function getErrorSymbol(error: Error): string {
   return (
     errorSymbols.get(error.message) || (errorSymbols.get("default") as string)
   );
-}
-
-export function getNotificationReasonText(reason: string): string {
-  return notificationReasons.get(reason) || "";
 }
 
 export const defaultTitle = "GitHub Custom Notifier";

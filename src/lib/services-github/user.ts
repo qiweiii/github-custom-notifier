@@ -11,3 +11,5 @@ export async function getUser(update: boolean) {
 
   return user;
 }
+
+// search users
