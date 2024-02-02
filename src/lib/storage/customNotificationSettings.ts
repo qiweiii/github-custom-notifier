@@ -1,9 +1,18 @@
 export type CustomNotificationSettingsV1 = {
   repos: {
     repoName: string;
-    labelssToListen: string[]; // good-first-issue, help wanted, etc
-    atToListen: string[]; // @username
-    textToListen: string[]; // XXComponent, urgent, etc
+    /**
+     * Notify when someone labeled [good-first-issue, help-wanted, etc]
+     */
+    labeled: string[];
+    /**
+     * Notify when someone mentioned [username, xyz, etc]
+     */
+    mentioned: string[]; // @username, @xyz
+    /**
+     * Notify when someone commented with [urgent, qiwei-yang, etc]
+     */
+    commented: string[]; // text to match in comment body: XXComponent, urgent, etc
   }[];
 };
 

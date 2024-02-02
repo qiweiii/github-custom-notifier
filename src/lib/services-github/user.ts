@@ -1,15 +1,20 @@
-import { getOctokit } from "../api";
+import { getOctokit } from "../octokit";
 import userInfoStorage from "../storage/user";
 
-export async function getUser(update: boolean) {
+export async function fetchAuthedUser(update: boolean) {
   const octokit = getOctokit();
   let user = await userInfoStorage.getValue();
   if (update || !user) {
     const { data } = await octokit.request("GET /user");
     await userInfoStorage.setValue(data);
   }
-
   return user;
 }
 
-// search users
+export async function getAnyUser(text: string) {
+  const octokit = getOctokit();
+  const { data } = await octokit.request("GET /users/{username}", {
+    username: text,
+  });
+  return data;
+}
