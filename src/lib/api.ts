@@ -21,15 +21,18 @@ import {
   fetchAuthedUser,
   fetchIssueDetails,
   fetchNIssues,
+  fetchNIssueComments,
   fetchRepoDetails,
   searchRepos,
   searchUsers,
+  OctokitIssueEvent,
 } from "./services-github";
 import { renderCount } from "./services-ext/badge";
 import { playNotificationSound } from "./services-ext";
+import { getGitHubOrigin } from "./util";
 
-export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
-export const ISSUE_EVENT_TYPES = new Set(["labeled", "mentioned"]);
+// export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
+// export const ISSUE_EVENT_TYPES = new Set(["labeled", "mentioned"]);
 
 /**
  * Call github api to get events data, process them to notifications, and store them in storage.
@@ -37,64 +40,60 @@ export const ISSUE_EVENT_TYPES = new Set(["labeled", "mentioned"]);
  * Willed be used in background entrypoint to periodically poll data
  */
 export const fetchAndUpdate = async () => {
-  // - prepare
-  //   - 📝 note: that events api has issue events and timeline events, depends on event type, need to see which api to use for the event. E.g commented event need to use timeline event api which only work on issue level ⇒ that means still need to get issues first….
-  //   - a set of unique issue ids that added in this round of poll, so avoid add dup to newEvents array (some events are both timeline event and issue event)
-  //   - timeline event only types: `comment`, `commited`, `reviewed`, etc
-  //   - issue events: `mentioned`, `labeled`, etc
-  // - For each setting item (each repo)
-  //     - if have timeline events
-  //         - get data: if lastFetched > 2hr or null, get latest 20 issues (1 page, 20 per page), else get (cap to 10) latest open issues sort by updated time after `since` using lastFetched time
-  //             - for each issue, get 20 timeline events, filter only configured types, and push to newEvents
-  //     - if have issue events
-  //         - get data: if don’t care abt lastFetched, get latest 50 events, filter only configured types, push to newEvents
-  // - for each event in newEvents, based on event type, pass each to configured handler and process it, and save as a NotifyItem in storage
-  //     - 📝 note: if any event need another request, don’t do it in poll, do it when user click the link….so it won’t waste request
-  // - update lastFetched = newUpdatedAt
-
   const newUpdatedAt = Date.now();
   const { lastFetched } = await customNotifications.getValue();
   const lastFetchedISO = new Date(lastFetched).toISOString();
 
   const { repos } = await customNotificationSettings.getValue();
   const newEvents: any[] = [];
-  const addedEventIds = new Set<number>();
+
   for (const [repoFullName, repoSetting] of Object.entries(repos)) {
-    const { labeled, mentioned, commented } = repoSetting;
-    const [owner, repo] = repoFullName.split("/");
-    if (commented?.length) {
-      // timeline only events (only have `commented` for now)
-      let issues = [];
+    const { labeled, mentioned, customCommented } = repoSetting;
+    if (customCommented?.length) {
+      // comments is special, not using events APIs, need to use issue comments API to reduce number of requests
+      let comments = [];
       if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
-        // TODO: test using 2, actually should be 20
-        issues = await fetchNIssues(repoFullName, undefined, 2);
+        // fetch more issue comments if lastFetched is not set or lastFetched is more than 2 hours ago
+        // TODO: test using 2, actually should be 100
+        comments = await fetchNIssueComments(repoFullName, undefined, 2);
       } else {
-        // TODO: test using 1, actually should be 10
-        issues = await fetchNIssues(repoFullName, lastFetchedISO, 1);
+        // otherwise, fetch based on lastFetched time
+        // TODO: test using 1, actually should be 40
+        comments = await fetchNIssueComments(repoFullName, lastFetchedISO, 1);
       }
-      for (const issue of issues) {
-        const { number } = issue;
-        const events = await fetchTimelineEvents(repoFullName, number);
-        for (const event of events) {
-          if (
-            TIMELINE_EVENT_TYPES.has(event.event) &&
-            !addedEventIds.has(event.id)
-          ) {
-            newEvents.push(event);
-            addedEventIds.add(event.id);
-          }
-        }
+      for (const comment of comments) {
+        const { updated_at, body, html_url, user } = comment;
+        // "html_url": "https://github.com/octocat/Hello-World/issues/1347#issuecomment-1",
+        const issueNumber = html_url.match(/\/issues\/(\d+)#issuecomment/)?.[1];
+        newEvents.push({
+          event: "custom-commented",
+          repoFullName,
+          issueNumber,
+          link: html_url,
+          body,
+          user: user?.login,
+          updated_at,
+          filter: { match: customCommented },
+        });
       }
     } else {
+      // issue events API handling
       const events = await fetchIssueEventsByRepo(repoFullName);
       for (const event of events) {
-        if (
-          ISSUE_EVENT_TYPES.has(event.event) &&
-          !addedEventIds.has(event.id)
-        ) {
-          newEvents.push(event);
-          addedEventIds.add(event.id);
-        }
+        newEvents.push({
+          ...event,
+          repoFullName,
+          issueNumber: event?.issue?.number,
+          issueTitle: event?.issue?.title,
+          filter: {
+            match:
+              event.event === "labeled"
+                ? labeled
+                : event.event === "mentioned"
+                ? mentioned
+                : [],
+          },
+        });
       }
     }
   }
@@ -102,8 +101,8 @@ export const fetchAndUpdate = async () => {
   // Process newEvents array to NotifyItems
   for (const event of newEvents) {
     switch (event.event) {
-      case "commented":
-        await onCommented(event);
+      case "custom-commented":
+        await onCustomCommented(event);
         break;
       case "labeled":
         await onLabeled(event);
@@ -120,7 +119,7 @@ export const fetchAndUpdate = async () => {
   updateCount();
 
   // update lastFetched time
-  customNotifications.setValue({
+  await customNotifications.setValue({
     ...(await customNotifications.getValue()),
     lastFetched: newUpdatedAt,
   });
@@ -148,12 +147,12 @@ export const getUnreadInfo = async () => {
   const { data } = await customNotifications.getValue();
   let unReadCount = 0;
   let hasUpdatesAfterLastFetchedTime = false;
-  for (const repoData of data) {
-    const repoName = Object.keys(repoData)[0];
-    const notifyItems = repoData[repoName].notifyItems;
+  for (const repoName in data) {
+    const repoData = data[repoName];
+    const notifyItems = repoData.notifyItems;
     for (const item of notifyItems) {
       unReadCount++;
-      if (item.time > lastFetched) {
+      if (item.createdAt > lastFetched) {
         hasUpdatesAfterLastFetchedTime = true;
       }
     }
@@ -164,14 +163,193 @@ export const getUnreadInfo = async () => {
 /**
  * Event Handler for `commented`, process the comment and store it in storage as a customNotification.
  */
-export const onCommented = async (event: any) => {};
+export const onCustomCommented = async (event: {
+  event: string;
+  repoFullName: string;
+  issueNumber: string;
+  filter: { match: string[] };
+  link: string;
+  body: string;
+  user: string;
+  updated_at: string;
+}) => {
+  if (event.event !== "custom-commented") return;
+  console.log("custom commented event: ", event);
+
+  const {
+    event: eventType,
+    repoFullName,
+    issueNumber,
+    link,
+    body,
+    filter,
+    user,
+    updated_at,
+  } = event;
+  // filter
+  const { match } = filter;
+  if (!match.length) return;
+  let matched = "";
+  for (const m of match) {
+    if (body.includes(m)) {
+      matched = m;
+      break;
+    }
+  }
+  if (!matched) return;
+
+  const oldNotifications = await customNotifications.getValue();
+
+  await customNotifications.setValue({
+    ...oldNotifications,
+    data: {
+      ...oldNotifications.data,
+      [repoFullName]: {
+        ...oldNotifications.data[repoFullName],
+        notifyItems: [
+          ...oldNotifications.data[repoFullName].notifyItems,
+          {
+            eventType,
+            reason: `@${user} commented with ...${matched}... on issue #${issueNumber} in ${repoFullName}`,
+            createdAt: new Date(updated_at).getTime(),
+            repoName: repoFullName,
+            link: link,
+            issue: {
+              number: parseInt(issueNumber),
+              title: "",
+            },
+          },
+        ],
+      },
+    },
+  });
+};
 
 /**
  * Event Handler for `labeled`, process the label and store it in storage as a customNotification.
  */
-export const onLabeled = async (event: any) => {};
+export const onLabeled = async (
+  event: OctokitIssueEvent & {
+    repoFullName: string;
+    issueNumber: string;
+    issueTitle: string;
+    filter: { match: string[] };
+  }
+) => {
+  if (event.event !== "labeled") {
+    return;
+  }
+  console.log("labeled event: ", event);
+  const {
+    event: eventType,
+    repoFullName,
+    issueNumber,
+    issueTitle,
+    filter,
+  } = event;
+
+  // filter
+  const { match } = filter;
+  if (!match.length) return;
+  let matched = "";
+  for (const m of match) {
+    if (
+      event.issue?.labels.find(
+        (l) => l === m || (typeof l !== "string" && l.name === m)
+      )
+    ) {
+      matched = m;
+      break;
+    }
+  }
+  if (!matched) return;
+
+  const oldNotifications = await customNotifications.getValue();
+  const origin = await getGitHubOrigin();
+  await customNotifications.setValue({
+    ...oldNotifications,
+    data: {
+      ...oldNotifications.data,
+      [repoFullName]: {
+        ...oldNotifications.data[repoFullName],
+        notifyItems: [
+          ...oldNotifications.data[repoFullName].notifyItems,
+          {
+            eventType,
+            reason: `Issue #${issueNumber} in ${repoFullName} is labeled with ${matched}`,
+            createdAt: Date.now(),
+            repoName: repoFullName,
+            link: `${origin}/${repoFullName}/issues/${issueNumber}`,
+            issue: {
+              number: parseInt(issueNumber),
+              title: issueTitle,
+            },
+          },
+        ],
+      },
+    },
+  });
+};
 
 /**
  * Event Handler for `mentioned`, process the mention and store it in storage as a customNotification.
  */
-export const onMentioned = async (event: any) => {};
+export const onMentioned = async (
+  event: OctokitIssueEvent & {
+    repoFullName: string;
+    issueNumber: string;
+    issueTitle: string;
+    filter: { match: string[] };
+  }
+) => {
+  if (event.event !== "mentioned") {
+    return;
+  }
+  console.log("mentioned event: ", event);
+
+  const {
+    event: eventType,
+    repoFullName,
+    issueNumber,
+    issueTitle,
+    filter,
+  } = event;
+  // filter
+
+  const { match } = filter;
+  if (!match.length) return;
+  let matched = "";
+  for (const m of match) {
+    if (event.actor?.login === m) {
+      matched = m;
+      break;
+    }
+  }
+  if (!matched) return;
+
+  const oldNotifications = await customNotifications.getValue();
+  const origin = await getGitHubOrigin();
+  await customNotifications.setValue({
+    ...oldNotifications,
+    data: {
+      ...oldNotifications.data,
+      [repoFullName]: {
+        ...oldNotifications.data[repoFullName],
+        notifyItems: [
+          ...oldNotifications.data[repoFullName].notifyItems,
+          {
+            eventType,
+            reason: `@${match} mentioned in issue #${issueNumber} in ${repoFullName}`,
+            createdAt: Date.now(),
+            repoName: repoFullName,
+            link: `${origin}/${repoFullName}/issues/${issueNumber}`,
+            issue: {
+              number: parseInt(issueNumber),
+              title: issueTitle,
+            },
+          },
+        ],
+      },
+    },
+  });
+};

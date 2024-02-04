@@ -1,6 +1,9 @@
 export type OptionsPageStorageV1 = {
   token: string;
   rootUrl: string;
+  /**
+   * min is 2 to prevent exceed rate limit
+   */
   interval: number;
   playNotifSound: boolean;
   showDesktopNotif: boolean;

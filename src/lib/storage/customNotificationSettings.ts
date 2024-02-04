@@ -4,13 +4,14 @@ export type RepoSettingV1 = {
    */
   labeled: string[];
   /**
-   * Notify when someone mentioned [username, xyz, etc]
+   * Notify when someone mentioned [username, xyz, etc], usernames without `@`
    */
   mentioned: string[]; // @username, @xyz
   /**
    * Notify when someone commented with [urgent, qiwei-yang, etc]
+   * Here, 'custom' means it it not GitHub's default event `commented` event type.
    */
-  commented: string[]; // text to match in comment body: XXComponent, urgent, etc
+  customCommented: string[]; // text to match in comment body: XXComponent, urgent, etc
 };
 
 export type CustomNotificationSettingsV1 = {

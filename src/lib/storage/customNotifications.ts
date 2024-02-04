@@ -54,17 +54,23 @@ export type NotifyItemV1 = {
    * reason of notification to be displayed
    */
   reason: string;
-  time: number;
+  createdAt: number;
+  /**
+   * Repo full name
+   */
   repoName: string;
   /**
    * link to comment, label, mention etc
    */
-  eventLink: string;
+  link: string;
   issue: {
     number: number;
+    /**
+     * Note that this could be empty string ''
+     */
     title: string;
   };
-  // don't need a read field since all notifications are unread, read ones are removed
+  // Don't need a `read` field anymore since all notifications are unread, read ones are removed
   // read: {
   //   value: boolean;
   //   updatedAt: string;
@@ -77,7 +83,7 @@ export type CustomNotificationsV1 = {
     [repoName: string]: {
       notifyItems: NotifyItemV1[];
     };
-  }[];
+  };
 };
 
 const customNotifications = storage.defineItem<CustomNotificationsV1>(
@@ -85,7 +91,7 @@ const customNotifications = storage.defineItem<CustomNotificationsV1>(
   {
     defaultValue: {
       lastFetched: 0,
-      data: [],
+      data: {},
     },
   }
 );

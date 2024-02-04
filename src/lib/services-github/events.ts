@@ -1,10 +1,13 @@
 import { Endpoints } from "@octokit/types";
 import { getOctokit } from "../octokit";
 
+export type OctokitTimelineEvent =
+  Endpoints["GET /repos/{owner}/{repo}/issues/{issue_number}/events"]["response"]["data"][0];
+
 export async function fetchTimelineEvents(
   repoFullName: string,
   issueNumber: number
-) {
+): Promise<OctokitTimelineEvent[]> {
   const octokit = getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/{issue_number}/events",
@@ -18,7 +21,12 @@ export async function fetchTimelineEvents(
   return data;
 }
 
-export async function fetchIssueEventsByRepo(repoFullName: string) {
+export type OctokitIssueEvent =
+  Endpoints["GET /repos/{owner}/{repo}/issues/events"]["response"]["data"][0];
+
+export async function fetchIssueEventsByRepo(
+  repoFullName: string
+): Promise<OctokitIssueEvent[]> {
   const octokit = getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/events",

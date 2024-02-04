@@ -34,3 +34,41 @@ export async function fetchIssueDetails(
   );
   return data;
 }
+
+export async function fetchCommentById(
+  repoFullName: string,
+  commentId: number
+) {
+  const octokit = getOctokit();
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/issues/comments/{comment_id}",
+    {
+      owner: repoFullName.split("/")[0],
+      repo: repoFullName.split("/")[1],
+      comment_id: commentId,
+    }
+  );
+  return data;
+}
+
+// fetchNIssueComments
+export async function fetchNIssueComments(
+  repoFullName: string,
+  since?: string, // in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ
+  n: number = 40,
+  sort: "updated" | "created" = "updated"
+) {
+  const octokit = getOctokit();
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/issues/comments",
+    {
+      owner: repoFullName.split("/")[0],
+      repo: repoFullName.split("/")[1],
+      since,
+      sort,
+      page: 1,
+      per_page: n,
+    }
+  );
+  return data;
+}
