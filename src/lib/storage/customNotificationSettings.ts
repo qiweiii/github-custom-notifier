@@ -1,19 +1,23 @@
+export type RepoSettingV1 = {
+  /**
+   * Notify when someone labeled [good-first-issue, help-wanted, etc]
+   */
+  labeled: string[];
+  /**
+   * Notify when someone mentioned [username, xyz, etc]
+   */
+  mentioned: string[]; // @username, @xyz
+  /**
+   * Notify when someone commented with [urgent, qiwei-yang, etc]
+   */
+  commented: string[]; // text to match in comment body: XXComponent, urgent, etc
+};
+
 export type CustomNotificationSettingsV1 = {
-  repos: {
-    repoName: string;
-    /**
-     * Notify when someone labeled [good-first-issue, help-wanted, etc]
-     */
-    labeled: string[];
-    /**
-     * Notify when someone mentioned [username, xyz, etc]
-     */
-    mentioned: string[]; // @username, @xyz
-    /**
-     * Notify when someone commented with [urgent, qiwei-yang, etc]
-     */
-    commented: string[]; // text to match in comment body: XXComponent, urgent, etc
-  }[];
+  /**
+   * { repoFullName: RepoSetting, ... }
+   */
+  repos: Record<string, RepoSettingV1>;
 };
 
 const customNotificationSettings =
@@ -21,7 +25,7 @@ const customNotificationSettings =
     "local:customNotificationSettings",
     {
       defaultValue: {
-        repos: [],
+        repos: {},
       },
     }
   );

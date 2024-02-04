@@ -8,7 +8,7 @@
 /**
  * @deprecated - event based notification item is btter
  */
-type IssueOrPr = {
+type IssueOrPrV1 = {
   number: number;
   isPr: boolean;
   title: string;
@@ -45,7 +45,7 @@ type IssueOrPr = {
 /**
  * Event based nofitication item
  */
-export type NotifyItem = {
+export type NotifyItemV1 = {
   /**
    * See GitHub issue event types: <https://docs.github.com/en/rest/using-the-rest-api/issue-event-types?apiVersion=2022-11-28>
    */
@@ -54,7 +54,7 @@ export type NotifyItem = {
    * reason of notification to be displayed
    */
   reason: string;
-  time: string;
+  time: number;
   repoName: string;
   /**
    * link to comment, label, mention etc
@@ -64,16 +64,19 @@ export type NotifyItem = {
     number: number;
     title: string;
   };
+  // don't need a read field since all notifications are unread, read ones are removed
+  // read: {
+  //   value: boolean;
+  //   updatedAt: string;
+  // };
 };
 
 export type CustomNotificationsV1 = {
-  updatedAt: number;
+  lastFetched: number;
   data: {
     [repoName: string]: {
-      notifyItems: NotifyItem[];
-      // last time we fetched events from this repo
-      lastFetched: number;
-    }[];
+      notifyItems: NotifyItemV1[];
+    };
   }[];
 };
 
@@ -81,7 +84,7 @@ const customNotifications = storage.defineItem<CustomNotificationsV1>(
   "local:customNotifications",
   {
     defaultValue: {
-      updatedAt: 0,
+      lastFetched: 0,
       data: [],
     },
   }

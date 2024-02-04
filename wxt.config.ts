@@ -26,7 +26,7 @@ export default defineConfig({
     },
     web_accessible_resources: [
       {
-        resources: ["assets/bell.ogg"],
+        resources: ["bell.ogg"],
         matches: ["*://*/*"],
       },
     ],

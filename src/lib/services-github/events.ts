@@ -1,3 +1,4 @@
+import { Endpoints } from "@octokit/types";
 import { getOctokit } from "../octokit";
 
 export async function fetchTimelineEvents(
@@ -11,6 +12,7 @@ export async function fetchTimelineEvents(
       owner: repoFullName.split("/")[0],
       repo: repoFullName.split("/")[1],
       issue_number: issueNumber,
+      per_page: 20,
     }
   );
   return data;
@@ -23,7 +25,7 @@ export async function fetchIssueEventsByRepo(repoFullName: string) {
     {
       owner: repoFullName.split("/")[0],
       repo: repoFullName.split("/")[1],
-      per_page: 30,
+      per_page: 50,
     }
   );
   return data;
