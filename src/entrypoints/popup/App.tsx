@@ -1,5 +1,4 @@
 import { useState } from "react";
-import wxtLogo from "/wxt.svg";
 import "./App.css";
 
 function App() {
@@ -8,9 +7,7 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://wxt.dev" target="_blank">
-          <img src={wxtLogo} className="logo" alt="WXT logo" />
-        </a>
+        <a href="https://wxt.dev" target="_blank"></a>
         <a href="https://react.dev" target="_blank"></a>
       </div>
       <h1>WXT + React</h1>

@@ -28,7 +28,7 @@ import {
   OctokitIssueEvent,
 } from "./services-github";
 import { renderCount } from "./services-ext/badge";
-import { playNotificationSound } from "./services-ext";
+import { playNotificationSound, showNotifications } from "./services-ext";
 import { getGitHubOrigin } from "./util";
 
 // export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
@@ -66,6 +66,7 @@ export const fetchAndUpdate = async () => {
         // "html_url": "https://github.com/octocat/Hello-World/issues/1347#issuecomment-1",
         const issueNumber = html_url.match(/\/issues\/(\d+)#issuecomment/)?.[1];
         newEvents.push({
+          id: comment.id,
           event: "custom-commented",
           repoFullName,
           issueNumber,
@@ -133,12 +134,21 @@ const scheduleNextFetch = async () => {
   browser.alarms.create("fetch-data", { delayInMinutes: interval });
 };
 
+/**
+ * Update cound on badge also trigger notification sound and desktop notification if needed.
+ */
 const updateCount = async () => {
-  const { unReadCount, hasUpdatesAfterLastFetchedTime } = await getUnreadInfo();
+  const { unReadCount, hasUpdatesAfterLastFetchedTime, items } =
+    await getUnreadInfo();
   renderCount(unReadCount);
-  const { playNotifSound } = await optionsStorage.getValue();
-  if (unReadCount && playNotifSound && hasUpdatesAfterLastFetchedTime) {
-    playNotificationSound();
+  const { playNotifSound, showDesktopNotif } = await optionsStorage.getValue();
+  if (unReadCount && hasUpdatesAfterLastFetchedTime) {
+    if (playNotifSound) {
+      playNotificationSound();
+    }
+    if (showDesktopNotif) {
+      showNotifications(items);
+    }
   }
 };
 
@@ -147,23 +157,26 @@ export const getUnreadInfo = async () => {
   const { data } = await customNotifications.getValue();
   let unReadCount = 0;
   let hasUpdatesAfterLastFetchedTime = false;
+  const items: NotifyItemV1[] = [];
   for (const repoName in data) {
     const repoData = data[repoName];
     const notifyItems = repoData.notifyItems;
     for (const item of notifyItems) {
       unReadCount++;
+      items.push(item);
       if (item.createdAt > lastFetched) {
         hasUpdatesAfterLastFetchedTime = true;
       }
     }
   }
-  return { unReadCount, hasUpdatesAfterLastFetchedTime };
+  return { unReadCount, hasUpdatesAfterLastFetchedTime, items };
 };
 
 /**
  * Event Handler for `commented`, process the comment and store it in storage as a customNotification.
  */
 export const onCustomCommented = async (event: {
+  id: number;
   event: string;
   repoFullName: string;
   issueNumber: string;
@@ -177,6 +190,7 @@ export const onCustomCommented = async (event: {
   console.log("custom commented event: ", event);
 
   const {
+    id,
     event: eventType,
     repoFullName,
     issueNumber,
@@ -209,6 +223,7 @@ export const onCustomCommented = async (event: {
         notifyItems: [
           ...oldNotifications.data[repoFullName].notifyItems,
           {
+            id: `issuecomment-${id}`,
             eventType,
             reason: `@${user} commented with ...${matched}... on issue #${issueNumber} in ${repoFullName}`,
             createdAt: new Date(updated_at).getTime(),
@@ -241,6 +256,7 @@ export const onLabeled = async (
   }
   console.log("labeled event: ", event);
   const {
+    id,
     event: eventType,
     repoFullName,
     issueNumber,
@@ -275,6 +291,7 @@ export const onLabeled = async (
         notifyItems: [
           ...oldNotifications.data[repoFullName].notifyItems,
           {
+            id: `issueevent-${id}`,
             eventType,
             reason: `Issue #${issueNumber} in ${repoFullName} is labeled with ${matched}`,
             createdAt: Date.now(),
@@ -313,6 +330,7 @@ export const onMentioned = async (
     issueNumber,
     issueTitle,
     filter,
+    id,
   } = event;
   // filter
 
@@ -338,6 +356,7 @@ export const onMentioned = async (
         notifyItems: [
           ...oldNotifications.data[repoFullName].notifyItems,
           {
+            id: `issueevent-${id}`,
             eventType,
             reason: `@${match} mentioned in issue #${issueNumber} in ${repoFullName}`,
             createdAt: Date.now(),

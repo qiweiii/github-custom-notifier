@@ -20,7 +20,7 @@ export default defineConfig({
       "128": "icon/128.png",
     },
     permissions: ["alarms", "storage"],
-    optional_permissions: ["notifications"],
+    optional_permissions: ["notifications", "tabs"],
     browser_action: {
       default_icon: "icon/icon-toolbar.png",
     },

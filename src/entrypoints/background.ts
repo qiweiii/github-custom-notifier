@@ -1,4 +1,5 @@
 import { fetchAndUpdate } from "../lib/api";
+import { openNotification, queryPermission } from "../lib/services-ext";
 import optionsStorage, { OptionsPageStorageV1 } from "../lib/storage/options";
 
 export default defineBackground(async () => {
@@ -12,6 +13,14 @@ export default defineBackground(async () => {
   // window.addEventListener("online", startPollData);
   // window.addEventListener("offline", startPollData);
 
+  const onNotificationClick = (id: string) => {
+    openNotification(id);
+  };
+
+  if (await queryPermission("notifications")) {
+    browser.notifications.onClicked.addListener(onNotificationClick);
+  }
+
   // Poll data loop
   const options = await optionsStorage.getValue();
   // Initially, start polling data if token and rootUrl are set
@@ -20,7 +29,6 @@ export default defineBackground(async () => {
     fetchAndUpdate();
   }
   browser.alarms.onAlarm.addListener(fetchAndUpdate);
-
   // If api configuration changed, re-fetch data immediately
   storage.watch<OptionsPageStorageV1>(
     "local:optionsStorage",

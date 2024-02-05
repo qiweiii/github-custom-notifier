@@ -46,6 +46,7 @@ type IssueOrPrV1 = {
  * Event based nofitication item
  */
 export type NotifyItemV1 = {
+  id: string;
   /**
    * See GitHub issue event types: <https://docs.github.com/en/rest/using-the-rest-api/issue-event-types?apiVersion=2022-11-28>
    */
