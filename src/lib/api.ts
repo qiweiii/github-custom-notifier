@@ -54,7 +54,7 @@ export const fetchAndUpdate = async () => {
       let comments = [];
       if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
         // fetch more issue comments if lastFetched is not set or lastFetched is more than 2 hours ago
-        // TODO: test using 2, actually should be 100
+        // TODO: test using 2, actually should be 80
         comments = await fetchNIssueComments(repoFullName, undefined, 2);
       } else {
         // otherwise, fetch based on lastFetched time
