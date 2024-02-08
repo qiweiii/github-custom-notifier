@@ -59,7 +59,7 @@ function App() {
         </label>
         <p className="text-sm">
           <a
-            href="https://github.com/settings/tokens/new?scopes=notifications&description=GitHub Custom Notifier extension"
+            href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub Custom Notifier extension"
             target="_blank"
           >
             Create a token
