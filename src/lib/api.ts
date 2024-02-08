@@ -10,6 +10,7 @@ import userInfoStorage, { userInfoStorageV1 } from "./storage/user";
 import customNotifications, {
   CustomNotificationsV1,
   NotifyItemV1,
+  saveNotifyItemByRepo,
 } from "./storage/customNotifications";
 import customNotificationSettings, {
   CustomNotificationSettingsV1,
@@ -212,30 +213,16 @@ export const onCustomCommented = async (event: {
   }
   if (!matched) return;
 
-  const oldNotifications = await customNotifications.getValue();
-
-  await customNotifications.setValue({
-    ...oldNotifications,
-    data: {
-      ...oldNotifications.data,
-      [repoFullName]: {
-        ...oldNotifications.data[repoFullName],
-        notifyItems: [
-          ...oldNotifications.data[repoFullName].notifyItems,
-          {
-            id: `issuecomment-${id}`,
-            eventType,
-            reason: `@${user} commented with ...${matched}... on issue #${issueNumber} in ${repoFullName}`,
-            createdAt: new Date(updated_at).getTime(),
-            repoName: repoFullName,
-            link: link,
-            issue: {
-              number: parseInt(issueNumber),
-              title: "",
-            },
-          },
-        ],
-      },
+  await saveNotifyItemByRepo(repoFullName, {
+    id: `issuecomment-${id}`,
+    eventType,
+    reason: `@${user} commented with ...${matched}... on issue #${issueNumber} in ${repoFullName}`,
+    createdAt: new Date(updated_at).getTime(),
+    repoName: repoFullName,
+    link: link,
+    issue: {
+      number: parseInt(issueNumber),
+      title: "",
     },
   });
 };
@@ -280,30 +267,18 @@ export const onLabeled = async (
   }
   if (!matched) return;
 
-  const oldNotifications = await customNotifications.getValue();
   const origin = await getGitHubOrigin();
-  await customNotifications.setValue({
-    ...oldNotifications,
-    data: {
-      ...oldNotifications.data,
-      [repoFullName]: {
-        ...oldNotifications.data[repoFullName],
-        notifyItems: [
-          ...oldNotifications.data[repoFullName].notifyItems,
-          {
-            id: `issueevent-${id}`,
-            eventType,
-            reason: `Issue #${issueNumber} in ${repoFullName} is labeled with ${matched}`,
-            createdAt: Date.now(),
-            repoName: repoFullName,
-            link: `${origin}/${repoFullName}/issues/${issueNumber}`,
-            issue: {
-              number: parseInt(issueNumber),
-              title: issueTitle,
-            },
-          },
-        ],
-      },
+
+  await saveNotifyItemByRepo(repoFullName, {
+    id: `issueevent-${id}`,
+    eventType,
+    reason: `Issue #${issueNumber} in ${repoFullName} is labeled with ${matched}`,
+    createdAt: Date.now(),
+    repoName: repoFullName,
+    link: `${origin}/${repoFullName}/issues/${issueNumber}`,
+    issue: {
+      number: parseInt(issueNumber),
+      title: issueTitle,
     },
   });
 };
@@ -345,30 +320,18 @@ export const onMentioned = async (
   }
   if (!matched) return;
 
-  const oldNotifications = await customNotifications.getValue();
   const origin = await getGitHubOrigin();
-  await customNotifications.setValue({
-    ...oldNotifications,
-    data: {
-      ...oldNotifications.data,
-      [repoFullName]: {
-        ...oldNotifications.data[repoFullName],
-        notifyItems: [
-          ...oldNotifications.data[repoFullName].notifyItems,
-          {
-            id: `issueevent-${id}`,
-            eventType,
-            reason: `@${match} mentioned in issue #${issueNumber} in ${repoFullName}`,
-            createdAt: Date.now(),
-            repoName: repoFullName,
-            link: `${origin}/${repoFullName}/issues/${issueNumber}`,
-            issue: {
-              number: parseInt(issueNumber),
-              title: issueTitle,
-            },
-          },
-        ],
-      },
+
+  await saveNotifyItemByRepo(repoFullName, {
+    id: `issueevent-${id}`,
+    eventType,
+    reason: `@${match} mentioned in issue #${issueNumber} in ${repoFullName}`,
+    createdAt: Date.now(),
+    repoName: repoFullName,
+    link: `${origin}/${repoFullName}/issues/${issueNumber}`,
+    issue: {
+      number: parseInt(issueNumber),
+      title: issueTitle,
     },
   });
 };

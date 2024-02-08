@@ -87,6 +87,32 @@ export type CustomNotificationsV1 = {
   };
 };
 
+/**
+ * Save notification item by repo.
+ * Deduplication is handled in this functions, if item already exists then it will be replaced.
+ */
+export const saveNotifyItemByRepo = async (
+  repoName: string,
+  notifyItem: NotifyItemV1
+) => {
+  const { data } = await customNotifications.getValue();
+  if (!data[repoName]) {
+    data[repoName] = {
+      notifyItems: [],
+    };
+  }
+
+  // Deduplication
+  const notifyItems = data[repoName].notifyItems;
+  const index = notifyItems.findIndex((item) => item.id === notifyItem.id);
+  if (index !== -1) {
+    notifyItems[index] = notifyItem;
+  } else {
+    notifyItems.push(notifyItem);
+  }
+  await customNotifications.setValue({ data, lastFetched: Date.now() });
+};
+
 const customNotifications = storage.defineItem<CustomNotificationsV1>(
   "local:customNotifications",
   {
