@@ -3,6 +3,7 @@ import { openNotification, queryPermission } from "../lib/services-ext";
 import optionsStorage, { OptionsPageStorageV1 } from "../lib/storage/options";
 
 export default defineBackground(async () => {
+  // Open options page after extension installed
   browser.runtime.onInstalled.addListener(({ reason }) => {
     if (reason === "install") {
       browser.runtime.openOptionsPage();
@@ -13,29 +14,32 @@ export default defineBackground(async () => {
   // window.addEventListener("online", startPollData);
   // window.addEventListener("offline", startPollData);
 
+  // Callback for notification click
   const onNotificationClick = (id: string) => {
     openNotification(id);
   };
-
   if (await queryPermission("notifications")) {
     browser.notifications.onClicked.addListener(onNotificationClick);
   }
 
   // Poll data loop
+  const startPollData = async () => {
+    await browser.alarms.clearAll();
+    fetchAndUpdate();
+  };
+
   const options = await optionsStorage.getValue();
   // Initially, start polling data if token and rootUrl are set
   if (options.token && options.rootUrl) {
-    await browser.alarms.clearAll();
-    fetchAndUpdate();
+    startPollData();
   }
   browser.alarms.onAlarm.addListener(fetchAndUpdate);
-  // If api configuration changed, re-fetch data immediately
+  // If api related configuration changed, re-fetch data immediately
   storage.watch<OptionsPageStorageV1>(
     "local:optionsStorage",
     async (newValue, oldValue) => {
       if (newValue?.token && newValue?.rootUrl) {
-        await browser.alarms.clearAll();
-        fetchAndUpdate();
+        startPollData();
       }
     }
   );

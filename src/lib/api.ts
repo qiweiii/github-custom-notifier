@@ -37,8 +37,9 @@ import { getGitHubOrigin } from "./util";
 
 /**
  * Call github api to get events data, process them to notifications, and store them in storage.
+ * Willed be used in background entrypoint to periodically poll data.
  *
- * Willed be used in background entrypoint to periodically poll data
+ * IMPT: this function may take some time if there are too many events to process.
  */
 export const fetchAndUpdate = async () => {
   const newUpdatedAt = Date.now();
