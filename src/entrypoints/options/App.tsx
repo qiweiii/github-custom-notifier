@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import optionsStorage, {
   OptionsPageStorageV1,
 } from "@/src/lib/storage/options";
+import { getApiUrl } from "@/src/lib/util";
 import "./App.css";
 
 function App() {
@@ -20,44 +21,53 @@ function App() {
   }, []);
 
   const onSave = async () => {
-    await optionsStorage.setValue(state);
+    await optionsStorage.setValue({
+      ...state,
+      interval: state.interval || 2,
+      rootUrl: getApiUrl(state.rootUrl || "https://github.com"),
+    });
   };
 
   return (
-    <div>
+    <div className="text-left">
       <section>
-        <h3>API Access</h3>
+        <h3 className="text-2xl">API Access</h3>
 
         <label>
-          <h4>Root URL</h4>
+          <h4 className="text-lg mt-2">Root URL</h4>
           <input
+            className="w-60"
             type="url"
             name="rootUrl"
-            placeholder="e.g. https://github.yourco.com/"
+            placeholder="e.g. https://github.yourco.com"
             onChange={(e) => {
               setState((state) => ({ ...state, rootUrl: e.target.value }));
             }}
           />
         </label>
-        <p className="text-sm">
-          Specify the root URL to your GitHub Enterprise (leave this blank if
-          you are not using GitHub Enterprise).
+        <p className="text-sm mt-1">
+          Specify the root URL to your GitHub Enterprise (defaults to
+          https://github.com)
         </p>
 
         <label>
-          <h4>Token</h4>
+          <h4 className="text-lg mt-2">
+            Token (<span className="text-red-500">required</span>)
+          </h4>
           <input
+            className="w-60"
             type="text"
             name="token"
             placeholder="ghp_a1b2c3d4e5f6g7h8i9j0a1b2c3d4e5f6g7h8"
             pattern="[\da-f]{40}|ghp_\w{36,251}"
             spellCheck="false"
+            required
             onChange={(e) => {
               setState((state) => ({ ...state, token: e.target.value }));
             }}
           />
         </label>
-        <p className="text-sm">
+        <div className="text-sm">
           <a
             href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub Custom Notifier extension"
             target="_blank"
@@ -65,13 +75,13 @@ function App() {
             Create a token
           </a>{" "}
           with the <strong>repo</strong> permission.
-        </p>
+        </div>
       </section>
 
-      <hr />
+      <hr className="my-5" />
 
       <section>
-        <h3>Polling Interval</h3>
+        <h3 className="text-xl mt-2">Polling Interval</h3>
         <label>
           <input
             type="number"
@@ -84,15 +94,13 @@ function App() {
                 interval: parseInt(e.target.value, 10),
               }));
             }}
-          />
+          />{" "}
           minutes (Get data every n minutes, default is 2 minutes)
         </label>
       </section>
 
-      <hr />
-
       <section>
-        <h3>Notifications</h3>
+        <h3 className="text-xl mt-2">Notifications</h3>
         <label>
           <input
             type="checkbox"
@@ -122,13 +130,14 @@ function App() {
         </label>
       </section>
 
-      <hr />
+      <hr className="my-5" />
 
       <section>
-        <h3>Buy Me a Coffee!</h3>
+        <h3 className="text-xl">Buy Me a Coffee!</h3>
         <p>
           If you like this extension, consider buying me a coffee. Your support
-          will help me to continue maintaining this extension for free.
+          will help me to continue maintaining this extension for{" "}
+          <strong>free</strong>.
         </p>
         <a
           href="https://www.buymeacoffee.com/qiwei"
@@ -143,13 +152,22 @@ function App() {
         </a>
       </section>
 
-      <hr />
+      <hr className="my-5" />
 
       <p>
         Please save and click on Github Custom Notifier icon in the browser
         toolbar to configure which repos to receive notifications from.
       </p>
-      <button onClick={onSave}>Save</button>
+
+      <button
+        onClick={onSave}
+        disabled={!state.token}
+        className={`mt-5 ${
+          state.token ? "cursor-pointer" : "cursor-not-allowed"
+        }`}
+      >
+        Save
+      </button>
     </div>
   );
 }

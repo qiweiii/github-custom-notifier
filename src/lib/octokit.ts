@@ -1,6 +1,7 @@
 import { Octokit } from "octokit";
 
 import { OptionsPageStorageV1 } from "./storage/options";
+import { getApiUrl } from "./util";
 
 let octokit: Octokit | null = null;
 
@@ -10,7 +11,7 @@ storage.watch<OptionsPageStorageV1>(
     if (newValue) {
       octokit = new Octokit({
         auth: newValue.token,
-        baseUrl: newValue.rootUrl,
+        baseUrl: getApiUrl(newValue.rootUrl),
       });
     }
   }

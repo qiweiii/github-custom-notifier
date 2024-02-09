@@ -15,17 +15,15 @@ export async function getGitHubOrigin() {
 }
 
 /**
- * Get the GitHub API URL from the options storage.
+ * Get the GitHub API URL based on origin.
  */
-export async function getApiUrl() {
-  const { rootUrl } = await optionsStorage.getValue();
-  const { origin } = new URL(rootUrl);
-
-  if (origin === "https://api.github.com" || origin === "https://github.com") {
+export function getApiUrl(origin: string) {
+  const { origin: o } = new URL(origin);
+  if (o === "https://api.github.com" || o === "https://github.com") {
     return "https://api.github.com";
   }
 
-  return `${origin}/api/v3`;
+  return `${o}/api/v3`;
 }
 
 /**

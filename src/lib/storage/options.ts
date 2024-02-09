@@ -1,5 +1,8 @@
 export type OptionsPageStorageV1 = {
   token: string;
+  /**
+   * This is GitHub Origin url, not API url, use `getApiUrl()` to get api url
+   */
   rootUrl: string;
   /**
    * min is 2 to prevent exceed rate limit
@@ -14,7 +17,7 @@ const optionsStorage = storage.defineItem<OptionsPageStorageV1>(
   {
     defaultValue: {
       token: "",
-      rootUrl: "https://api.github.com/",
+      rootUrl: "https://github.com",
       interval: 2,
       playNotifSound: false,
       showDesktopNotif: false,
