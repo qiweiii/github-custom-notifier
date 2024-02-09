@@ -24,6 +24,7 @@ function App() {
     console.log("Saving options", state);
     await optionsStorage.setValue({
       ...state,
+      token: state.token?.trim(),
       interval: state.interval || 2,
       rootUrl: getApiUrl(state.rootUrl || "https://github.com"),
     });
@@ -32,12 +33,21 @@ function App() {
   return (
     <div className="text-left">
       <section>
-        <h3 className="text-2xl">API Access</h3>
+        <div className="flex justify-between">
+          <h3 className="text-xl">API Access</h3>
+          <a
+            href="https://github.com/qiweiii/github-custom-notifier/tree/main"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Source Code
+          </a>
+        </div>
 
         <label>
-          <h4 className="text-lg mt-2">Root URL</h4>
+          <h4 className="text-lg my-2">Root URL</h4>
           <input
-            className="w-60"
+            className="w-96 border text-sm rounded-md block p-1.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-gray-180 focus:ring-blue-500 focus:border-blue-500"
             type="url"
             name="rootUrl"
             placeholder="e.g. https://github.yourco.com"
@@ -47,17 +57,17 @@ function App() {
             }}
           />
         </label>
-        <p className="text-sm mt-1">
+        <p>
           Specify the root URL to your GitHub Enterprise (defaults to
           https://github.com)
         </p>
 
         <label>
-          <h4 className="text-lg mt-2">
+          <h4 className="text-lg my-2">
             Token (<span className="text-red-500">required</span>)
           </h4>
           <input
-            className="w-60"
+            className="w-96 border text-sm rounded-md block p-1.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-gray-180 focus:ring-blue-500 focus:border-blue-500"
             type="text"
             name="token"
             placeholder="ghp_a1b2c3d4e5f6g7h8i9j0a1b2c3d4e5f6g7h8"
@@ -70,7 +80,7 @@ function App() {
             }}
           />
         </label>
-        <div className="text-sm">
+        <p>
           <a
             href="https://github.com/settings/tokens/new?scopes=repo&description=GitHub Custom Notifier extension"
             target="_blank"
@@ -78,15 +88,17 @@ function App() {
             Create a token
           </a>{" "}
           with the <strong>repo</strong> permission.
-        </div>
+        </p>
       </section>
 
       <hr className="my-5" />
 
       <section>
-        <h3 className="text-xl mt-2">Polling Interval</h3>
+        <h3 className="text-xl my-2">Polling Interval</h3>
         <label>
+          Get data every{" "}
           <input
+            className="w-12 border text-sm rounded-md p-1.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
             type="number"
             name="interval"
             min="2"
@@ -99,14 +111,15 @@ function App() {
               }));
             }}
           />{" "}
-          minutes (Get data every n minutes, default is 2 minutes)
+          minutes (defaults to 2 minutes)
         </label>
       </section>
 
       <section>
-        <h3 className="text-xl mt-2">Notifications</h3>
-        <label>
+        <h3 className="text-xl my-2">Notifications</h3>
+        <label className="flex items-center">
           <input
+            className="w-10 border text-sm rounded-md p-1.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
             type="checkbox"
             name="showDesktopNotif"
             data-request-permission="notifications"
@@ -120,8 +133,9 @@ function App() {
           />
           Show desktop notifications
         </label>
-        <label>
+        <label className="flex items-center">
           <input
+            className="w-10 border text-sm rounded-md p-1.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
             type="checkbox"
             name="playNotifSound"
             checked={state.playNotifSound}

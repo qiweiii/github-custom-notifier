@@ -9,7 +9,10 @@ export default defineConfig({
   entrypointsDir: "./src/entrypoints",
   manifestVersion: 3,
   manifest: {
-    description: "Custom Github Notifier",
+    name: "GitHub Custom Notifier",
+    short_name: "GH Custom Notifier",
+    description:
+      "Too many unwanted GitHub issue/pr notifications? This web extension allows you to customize which GitHub Event to be notified.",
     homepage_url: "https://github.com/qiweiii/github-custom-notifier",
     icons: {
       "16": "icon/16.png",
