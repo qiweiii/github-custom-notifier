@@ -21,6 +21,7 @@ function App() {
   }, []);
 
   const onSave = async () => {
+    console.log("Saving options", state);
     await optionsStorage.setValue({
       ...state,
       interval: state.interval || 2,
@@ -40,6 +41,7 @@ function App() {
             type="url"
             name="rootUrl"
             placeholder="e.g. https://github.yourco.com"
+            value={state.rootUrl}
             onChange={(e) => {
               setState((state) => ({ ...state, rootUrl: e.target.value }));
             }}
@@ -62,6 +64,7 @@ function App() {
             pattern="[\da-f]{40}|ghp_\w{36,251}"
             spellCheck="false"
             required
+            value={state.token}
             onChange={(e) => {
               setState((state) => ({ ...state, token: e.target.value }));
             }}
@@ -88,6 +91,7 @@ function App() {
             name="interval"
             min="2"
             max="60"
+            value={state.interval}
             onChange={(e) => {
               setState((state) => ({
                 ...state,
@@ -106,6 +110,7 @@ function App() {
             type="checkbox"
             name="showDesktopNotif"
             data-request-permission="notifications"
+            checked={state.showDesktopNotif}
             onChange={(e) => {
               setState((state) => ({
                 ...state,
@@ -119,6 +124,7 @@ function App() {
           <input
             type="checkbox"
             name="playNotifSound"
+            checked={state.playNotifSound}
             onChange={(e) => {
               setState((state) => ({
                 ...state,
