@@ -189,7 +189,7 @@ export const onCustomCommented = async (event: {
   updated_at: string;
 }) => {
   if (event.event !== "custom-commented") return;
-  console.log("custom commented event: ", event);
+  console.debug("[api] Event: custom commented", event);
 
   const {
     id,
@@ -242,7 +242,7 @@ export const onLabeled = async (
   if (event.event !== "labeled") {
     return;
   }
-  console.log("labeled event: ", event);
+  console.debug("[api] Event: labeled", event);
   const {
     id,
     event: eventType,
@@ -298,7 +298,7 @@ export const onMentioned = async (
   if (event.event !== "mentioned") {
     return;
   }
-  console.log("mentioned event: ", event);
+  console.debug("[api] Event: mentioned", event);
 
   const {
     event: eventType,

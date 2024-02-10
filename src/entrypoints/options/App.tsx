@@ -21,7 +21,7 @@ function App() {
   }, []);
 
   const onSave = async () => {
-    console.log("Saving options", state);
+    console.debug("[options page] Saving options", state);
     await optionsStorage.setValue({
       ...state,
       token: state.token?.trim(),
