@@ -26,7 +26,14 @@ const customNotificationSettings =
     "local:customNotificationSettings",
     {
       defaultValue: {
-        repos: {},
+        repos: {
+          // FIXME: This is just for testing, it should be empty by default
+          "qiweiii/github-custom-notifier": {
+            labeled: ["good-first-issue", "help-wanted"],
+            mentioned: ["qiweiii"],
+            customCommented: ["urgent"],
+          },
+        },
       },
     }
   );

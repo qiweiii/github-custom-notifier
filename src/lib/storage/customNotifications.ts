@@ -5,6 +5,8 @@
  * Item will be removed when open item in new page or on mark read
  */
 
+import { logger } from "../util";
+
 /**
  * @deprecated - event based notification item is btter
  */
@@ -55,6 +57,9 @@ export type NotifyItemV1 = {
    * reason of notification to be displayed
    */
   reason: string;
+  /**
+   * The real created/updated time based on Github event
+   */
   createdAt: number;
   /**
    * Repo full name
@@ -110,6 +115,15 @@ export const saveNotifyItemByRepo = async (
   } else {
     notifyItems.push(notifyItem);
   }
+
+  // data[repoName].notifyItems = notifyItems;
+
+  logger.info(
+    { data },
+    `[storage:customNotifications] Saved notification item by repo: ${repoName}`
+  );
+
+  // Finally save
   await customNotifications.setValue({ data, lastFetched: Date.now() });
 };
 

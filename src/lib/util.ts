@@ -1,4 +1,5 @@
 import optionsStorage from "./storage/options";
+import pino from "pino";
 
 /**
  * Get the GitHub origin from the options storage.
@@ -40,3 +41,10 @@ export function parseRepoFullName(fullName: string) {
   const [, owner, repository] = fullName.match(/^([^/]*)(?:\/(.*))?/) || [];
   return { owner, repository };
 }
+
+export const logger = pino({
+  browser: {
+    disabled: !process.env.NODE_ENV || process.env.NODE_ENV === "prod",
+    asObject: true,
+  },
+});

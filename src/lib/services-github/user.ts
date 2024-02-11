@@ -2,7 +2,7 @@ import { getOctokit } from "../octokit";
 import userInfoStorage from "../storage/user";
 
 export async function fetchAuthedUser(update: boolean) {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   let user = await userInfoStorage.getValue();
   if (update || !user) {
     const { data } = await octokit.request("GET /user");
@@ -12,7 +12,7 @@ export async function fetchAuthedUser(update: boolean) {
 }
 
 export async function getAnyUser(text: string) {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request("GET /users/{username}", {
     username: text,
   });

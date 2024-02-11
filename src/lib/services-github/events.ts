@@ -8,7 +8,7 @@ export async function fetchTimelineEvents(
   repoFullName: string,
   issueNumber: number
 ): Promise<OctokitTimelineEvent[]> {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/{issue_number}/events",
     {
@@ -27,13 +27,13 @@ export type OctokitIssueEvent =
 export async function fetchIssueEventsByRepo(
   repoFullName: string
 ): Promise<OctokitIssueEvent[]> {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/events",
     {
       owner: repoFullName.split("/")[0],
       repo: repoFullName.split("/")[1],
-      per_page: 50,
+      per_page: 40,
     }
   );
   return data;

@@ -1,6 +1,6 @@
 import { Octokit } from "octokit";
 
-import { OptionsPageStorageV1 } from "./storage/options";
+import optionsStorage, { OptionsPageStorageV1 } from "./storage/options";
 import { getApiUrl } from "./util";
 
 let octokit: Octokit | null = null;
@@ -17,11 +17,19 @@ storage.watch<OptionsPageStorageV1>(
   }
 );
 
-export function getOctokit() {
+export async function getOctokit() {
+  const { token, rootUrl } = await optionsStorage.getValue();
   if (!octokit) {
-    throw new Error(
-      "API not initialized, please make sure GitHub PAT and and root URL are set in the options page."
-    );
+    if (token && rootUrl) {
+      octokit = new Octokit({
+        auth: token,
+        baseUrl: getApiUrl(rootUrl),
+      });
+    } else {
+      throw new Error(
+        "API not initialized, please make sure GitHub PAT and and root URL are set in the options page."
+      );
+    }
   }
   return octokit;
 }

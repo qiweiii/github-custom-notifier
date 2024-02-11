@@ -6,7 +6,7 @@ export async function fetchNIssues(
   n: number = 20,
   sort: "updated" | "created" | "comments" = "updated"
 ) {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request("GET /repos/{owner}/{repo}/issues", {
     owner: repoFullName.split("/")[0],
     repo: repoFullName.split("/")[1],
@@ -23,7 +23,7 @@ export async function fetchIssueDetails(
   repoFullName: string,
   issueNumber: number
 ) {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/{issue_number}",
     {
@@ -39,7 +39,7 @@ export async function fetchCommentById(
   repoFullName: string,
   commentId: number
 ) {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/comments/{comment_id}",
     {
@@ -58,7 +58,7 @@ export async function fetchNIssueComments(
   n: number = 40,
   sort: "updated" | "created" = "updated"
 ) {
-  const octokit = getOctokit();
+  const octokit = await getOctokit();
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/issues/comments",
     {

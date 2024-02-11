@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
-    "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
+    "build": "NODE_ENV=prod wxt build",
+    "build:firefox": "NODE_ENV=prod wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "octokit": "^3.1.2",
+    "pino": "^8.18.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

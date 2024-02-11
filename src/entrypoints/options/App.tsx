@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import optionsStorage, {
   OptionsPageStorageV1,
 } from "@/src/lib/storage/options";
-import { getApiUrl } from "@/src/lib/util";
+import { getApiUrl, logger } from "@/src/lib/util";
 import "./App.css";
 
 function App() {
@@ -21,7 +21,7 @@ function App() {
   }, []);
 
   const onSave = async () => {
-    console.debug("[options page] Saving options", state);
+    logger.info({ state }, "[options page] Saving options");
     await optionsStorage.setValue({
       ...state,
       token: state.token?.trim(),
