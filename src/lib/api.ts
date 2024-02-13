@@ -200,7 +200,6 @@ export const getUnreadInfo = async () => {
     for (const item of notifyItems) {
       unReadCount++;
       items.push(item);
-      console.log(item.createdAt, lastFetched, item.createdAt > lastFetched);
       if (item.createdAt > lastFetched) {
         hasUpdatesAfterLastFetchedTime = true;
       }
