@@ -1,4 +1,7 @@
-import { NotifyItemV1 } from "../storage/customNotifications";
+import {
+  NotifyItemV1,
+  removeNotifyItemById,
+} from "../storage/customNotifications";
 import { queryPermission } from "./permissions";
 import { openTab } from "./tabs";
 
@@ -18,6 +21,7 @@ export async function openNotification(notificationId: string) {
   await removeNotification(notificationId);
 
   if (notifyItem) {
+    await removeNotifyItemById(notifyItem.id);
     return openTab(notifyItem.link);
   }
 }

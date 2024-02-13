@@ -1,4 +1,4 @@
 export * from "./badge";
 export * from "./permissions";
-export * from "./extension";
+export * from "./notification";
 export * from "./tabs";

@@ -92,6 +92,16 @@ export type CustomNotificationsV1 = {
   };
 };
 
+const customNotifications = storage.defineItem<CustomNotificationsV1>(
+  "local:customNotifications",
+  {
+    defaultValue: {
+      lastFetched: 0,
+      data: {},
+    },
+  }
+);
+
 /**
  * Save notification item by repo.
  * Deduplication is handled in this functions, if item already exists then it will be replaced.
@@ -100,7 +110,7 @@ export const saveNotifyItemByRepo = async (
   repoName: string,
   notifyItem: NotifyItemV1
 ) => {
-  const { data } = await customNotifications.getValue();
+  const { data, lastFetched } = await customNotifications.getValue();
   if (!data[repoName]) {
     data[repoName] = {
       notifyItems: [],
@@ -116,25 +126,35 @@ export const saveNotifyItemByRepo = async (
     notifyItems.push(notifyItem);
   }
 
-  // data[repoName].notifyItems = notifyItems;
-
   logger.info(
     { data },
     `[storage:customNotifications] Saved notification item by repo: ${repoName}`
   );
 
   // Finally save
-  await customNotifications.setValue({ data, lastFetched: Date.now() });
+  await customNotifications.setValue({ data, lastFetched });
 };
 
-const customNotifications = storage.defineItem<CustomNotificationsV1>(
-  "local:customNotifications",
-  {
-    defaultValue: {
-      lastFetched: 0,
-      data: {},
-    },
+/**
+ * Remove notification item by id.
+ */
+export const removeNotifyItemById = async (notifyItemId: string) => {
+  const { data } = await customNotifications.getValue();
+  for (const repoName in data) {
+    const notifyItems = data[repoName].notifyItems;
+    const index = notifyItems.findIndex((item) => item.id === notifyItemId);
+    if (index !== -1) {
+      notifyItems.splice(index, 1);
+      break;
+    }
   }
-);
+
+  logger.info(
+    { data },
+    `[storage:customNotifications] Removed notification item by id: ${notifyItemId}`
+  );
+
+  await customNotifications.setValue({ data, lastFetched: Date.now() });
+};
 
 export default customNotifications;

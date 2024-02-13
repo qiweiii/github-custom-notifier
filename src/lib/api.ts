@@ -1,6 +1,6 @@
 /**
  * Api module has the main functions that will be used by the extension entrypoints,
- * it accesses storages/ and integrate functions in `services-github/` and `services-ext/`.
+ * it accesses storages and integrate functions in `services-github/` and `services-ext/`.
  */
 
 import { getOctokit } from "./octokit";
@@ -200,6 +200,7 @@ export const getUnreadInfo = async () => {
     for (const item of notifyItems) {
       unReadCount++;
       items.push(item);
+      console.log(item.createdAt, lastFetched, item.createdAt > lastFetched);
       if (item.createdAt > lastFetched) {
         hasUpdatesAfterLastFetchedTime = true;
       }
