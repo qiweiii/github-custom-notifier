@@ -251,7 +251,7 @@ export const onCustomCommented = async (event: {
   await saveNotifyItemByRepo(repoFullName, {
     id: `issuecomment-${id}`,
     eventType,
-    reason: `@${user} commented with ...${matched}... on issue #${issueNumber} in ${repoFullName}`,
+    reason: `@${user} commented with "${matched}"`,
     createdAt: new Date(updated_at).getTime(),
     repoName: repoFullName,
     link: link,
@@ -304,7 +304,7 @@ export const onLabeled = async (
   await saveNotifyItemByRepo(repoFullName, {
     id: `issueevent-${id}`,
     eventType,
-    reason: `Issue #${issueNumber} in ${repoFullName} is labeled with ${matched}`,
+    reason: `Labeled with "${matched}"`,
     // since label only has created_at, use it as createdAt
     createdAt: new Date(created_at).getTime(),
     repoName: repoFullName,
@@ -359,7 +359,7 @@ export const onMentioned = async (
   await saveNotifyItemByRepo(repoFullName, {
     id: `issueevent-${id}`,
     eventType,
-    reason: `@${match} mentioned in issue #${issueNumber} in ${repoFullName}`,
+    reason: `@${match} mentioned in the issue`,
     // since label only has created_at, use it as createdAt
     createdAt: new Date(created_at).getTime(),
     repoName: repoFullName,

@@ -1,17 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 
 import "./App.css";
 import useOptions from "@/src/lib/hooks/useOptions";
-import { getUnreadInfo } from "@/src/lib/api";
-import { NotifyItemV1 } from "@/src/lib/storage/customNotifications";
 import Updates from "./components/Updates";
+import Settings from "./components/Settings";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,13 +42,6 @@ function a11yProps(index: number) {
 function App() {
   const [options] = useOptions();
   const [tabIdx, setTabIdx] = useState(0);
-  const [notifyItems, setNotifyItems] = useState<NotifyItemV1[]>([]);
-
-  useEffect(() => {
-    getUnreadInfo().then((data) => {
-      setNotifyItems(data.items);
-    });
-  }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabIdx(newValue);
@@ -66,7 +56,7 @@ function App() {
             browser.runtime.openOptionsPage();
           }}
         >
-          No access token, please set it{" "}
+          No access token, please set it in{" "}
           <Link
             onClick={() => browser.runtime.openOptionsPage()}
             sx={{ cursor: "pointer" }}
@@ -79,40 +69,17 @@ function App() {
       <Tabs value={tabIdx} onChange={handleTabChange} variant="fullWidth">
         <Tab label="Updates" {...a11yProps(0)} sx={{ textTransform: "none" }} />
         <Tab
-          label="Settings"
           {...a11yProps(1)}
+          label="Settings"
           sx={{ textTransform: "none" }}
         />
       </Tabs>
 
       <CustomTabPanel value={tabIdx} index={0}>
-        {notifyItems.length === 0 ? (
-          <Box
-            sx={{
-              width: "100%",
-              height: "300px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <p>No updates</p>
-            <Button
-              size="small"
-              variant="contained"
-              onClick={() => setTabIdx(1)}
-              sx={{ textTransform: "none" }}
-            >
-              Go to Settings
-            </Button>
-          </Box>
-        ) : (
-          <Updates />
-        )}
+        <Updates setTabIdx={setTabIdx} />
       </CustomTabPanel>
       <CustomTabPanel value={tabIdx} index={1}>
-        Settings
+        <Settings />
       </CustomTabPanel>
     </>
   );

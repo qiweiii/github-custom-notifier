@@ -12,6 +12,9 @@ export default function useOptions() {
   });
 
   useEffect(() => {
+    optionsStorage.getValue().then((value) => {
+      if (value) setState(value);
+    });
     optionsStorage.watch((value, oldValue) => {
       if (value) setState(value);
     });
