@@ -72,3 +72,16 @@ export async function fetchNIssueComments(
   );
   return data;
 }
+
+/**
+ * Get labels by repo full_name
+ */
+export async function fetchLabels(repoFullName: string) {
+  const octokit = await getOctokit();
+  const { data } = await octokit.request("GET /repos/{owner}/{repo}/labels", {
+    owner: repoFullName.split("/")[0],
+    repo: repoFullName.split("/")[1],
+    per_page: 80,
+  });
+  return data;
+}

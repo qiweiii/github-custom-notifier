@@ -19,8 +19,15 @@ export default function useSettingsState() {
   }, []);
 
   const save = async () => {
-    logger.info({ state }, "[popup page] Saving custom notification settings");
-    await customNotificationSettings.setValue(state);
+    // filter out empty repo names
+    const repos = Object.fromEntries(
+      Object.entries(state.repos).filter(([repoName]) => repoName)
+    );
+    logger.info(
+      { repos: repos },
+      "[popup page] Saving custom notification settings"
+    );
+    await customNotificationSettings.setValue({ repos });
   };
 
   return [state, setState, save] as const;
