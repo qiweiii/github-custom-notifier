@@ -6,7 +6,7 @@ import Link from "@mui/material/Link";
 import Box from "@mui/material/Box";
 
 import "./App.css";
-import useOptions from "@/src/lib/hooks/useOptions";
+import useOptionsState from "@/src/lib/hooks/useOptionsState";
 import Updates from "./components/Updates";
 import Settings from "./components/Settings";
 
@@ -40,7 +40,7 @@ function a11yProps(index: number) {
 }
 
 function App() {
-  const [options] = useOptions();
+  const [options] = useOptionsState();
   const [tabIdx, setTabIdx] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {

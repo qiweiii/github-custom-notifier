@@ -1,8 +1,8 @@
-import useOptions from "@/src/lib/hooks/useOptions";
+import useOptionsState from "@/src/lib/hooks/useOptionsState";
 import "./App.css";
 
 function App() {
-  const [state, setState, save] = useOptions();
+  const [state, setState, save] = useOptionsState();
 
   return (
     <div className="text-left">
