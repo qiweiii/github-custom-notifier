@@ -3,18 +3,18 @@
  * it accesses storages and integrate functions in `services-github/` and `services-ext/`.
  */
 
-import { getOctokit } from "./octokit";
-import optionsStorage, { OptionsPageStorageV1 } from "./storage/options";
-import userInfoStorage, { userInfoStorageV1 } from "./storage/user";
+import { getOctokit } from './octokit';
+import optionsStorage, { OptionsPageStorageV1 } from './storage/options';
+import userInfoStorage, { userInfoStorageV1 } from './storage/user';
 import customNotifications, {
   CustomNotificationsV1,
   NotifyItemV1,
   saveNotifyItemByRepo,
-} from "./storage/customNotifications";
+} from './storage/customNotifications';
 import customNotificationSettings, {
   CustomNotificationSettingsV1,
   RepoSettingV1,
-} from "./storage/customNotificationSettings";
+} from './storage/customNotificationSettings';
 import {
   fetchTimelineEvents,
   fetchIssueEventsByRepo,
@@ -26,10 +26,10 @@ import {
   searchRepos,
   searchUsers,
   OctokitIssueEvent,
-} from "./services-github";
-import { renderCount } from "./services-ext/badge";
-import { playNotificationSound, showNotifications } from "./services-ext";
-import { getGitHubOrigin, logger } from "./util";
+} from './services-github';
+import { renderCount } from './services-ext/badge';
+import { playNotificationSound, showNotifications } from './services-ext';
+import { getGitHubOrigin, logger } from './util';
 
 // export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
 // export const ISSUE_EVENT_TYPES = new Set(["labeled", "mentioned"]);
@@ -41,7 +41,7 @@ import { getGitHubOrigin, logger } from "./util";
  * IMPT: this function may take some time if there are too many events to process.
  */
 export const fetchAndUpdate = async () => {
-  logger.info("[api] Fetching and updating data");
+  logger.info('[api] Fetching and updating data');
   const newUpdatedAt = Date.now();
   const { lastFetched } = await customNotifications.getValue();
   const lastFetchedISO = new Date(lastFetched).toISOString();
@@ -77,7 +77,7 @@ export const fetchAndUpdate = async () => {
         const issueNumber = html_url.match(/\/issues\/(\d+)#issuecomment/)?.[1];
         newEvents.push({
           id: comment.id,
-          event: "custom-commented",
+          event: 'custom-commented',
           repoFullName,
           issueNumber,
           link: html_url,
@@ -98,7 +98,7 @@ export const fetchAndUpdate = async () => {
           repoFullName,
           events,
         },
-        "[api] Latest 50 Issue Events fetched for"
+        '[api] Latest 50 Issue Events fetched for'
       );
       for (const event of events) {
         newEvents.push({
@@ -107,12 +107,7 @@ export const fetchAndUpdate = async () => {
           issueNumber: event?.issue?.number,
           issueTitle: event?.issue?.title,
           filter: {
-            match:
-              event.event === "labeled"
-                ? labeled
-                : event.event === "mentioned"
-                ? mentioned
-                : [],
+            match: event.event === 'labeled' ? labeled : event.event === 'mentioned' ? mentioned : [],
           },
         });
       }
@@ -122,13 +117,13 @@ export const fetchAndUpdate = async () => {
   // Process newEvents array to NotifyItems
   for (const event of newEvents) {
     switch (event.event) {
-      case "custom-commented":
+      case 'custom-commented':
         await onCustomCommented(event);
         break;
-      case "labeled":
+      case 'labeled':
         await onLabeled(event);
         break;
-      case "mentioned":
+      case 'mentioned':
         await onMentioned(event);
         break;
       default:
@@ -141,7 +136,7 @@ export const fetchAndUpdate = async () => {
     {
       storage: await customNotifications.getValue(),
     },
-    "[api] customNotifications storage after update"
+    '[api] customNotifications storage after update'
   );
 
   // Update extension icon badge and play a sound
@@ -159,7 +154,7 @@ export const fetchAndUpdate = async () => {
 const scheduleNextFetch = async () => {
   const { interval } = await optionsStorage.getValue();
   await browser.alarms.clearAll();
-  browser.alarms.create("fetch-data", { delayInMinutes: interval });
+  browser.alarms.create('fetch-data', { delayInMinutes: interval });
   logger.info(`[api] Next fetch scheduled in ${interval} minutes`);
 };
 
@@ -167,15 +162,14 @@ const scheduleNextFetch = async () => {
  * Update cound on badge also trigger notification sound and desktop notification if needed.
  */
 const updateCount = async () => {
-  const { unReadCount, hasUpdatesAfterLastFetchedTime, items } =
-    await getUnreadInfo();
+  const { unReadCount, hasUpdatesAfterLastFetchedTime, items } = await getUnreadInfo();
   logger.info(
     {
       unReadCount,
       hasUpdatesAfterLastFetchedTime,
       items,
     },
-    "[api] Update count: unReadCount, hasUpdatesAfterLastFetchedTime"
+    '[api] Update count: unReadCount, hasUpdatesAfterLastFetchedTime'
   );
   renderCount(unReadCount);
   const { playNotifSound, showDesktopNotif } = await optionsStorage.getValue();
@@ -222,24 +216,14 @@ export const onCustomCommented = async (event: {
   user: string;
   updated_at: string;
 }) => {
-  if (event.event !== "custom-commented") return;
-  logger.info({ event }, "[api] Event: custom commented");
+  if (event.event !== 'custom-commented') return;
+  logger.info({ event }, '[api] Event: custom commented');
 
-  const {
-    id,
-    event: eventType,
-    repoFullName,
-    issueNumber,
-    link,
-    body,
-    filter,
-    user,
-    updated_at,
-  } = event;
+  const { id, event: eventType, repoFullName, issueNumber, link, body, filter, user, updated_at } = event;
   // filter
   const { match } = filter;
   if (!match.length) return;
-  let matched = "";
+  let matched = '';
   for (const m of match) {
     if (body.includes(m)) {
       matched = m;
@@ -257,7 +241,7 @@ export const onCustomCommented = async (event: {
     link: link,
     issue: {
       number: parseInt(issueNumber),
-      title: "",
+      title: '',
     },
   });
 };
@@ -273,24 +257,16 @@ export const onLabeled = async (
     filter: { match: string[] };
   }
 ) => {
-  if (event.event !== "labeled") {
+  if (event.event !== 'labeled') {
     return;
   }
-  logger.info({ event }, "[api] Event: labeled");
-  const {
-    id,
-    event: eventType,
-    repoFullName,
-    issueNumber,
-    issueTitle,
-    filter,
-    created_at,
-  } = event;
+  logger.info({ event }, '[api] Event: labeled');
+  const { id, event: eventType, repoFullName, issueNumber, issueTitle, filter, created_at } = event;
 
   // filter
   const { match } = filter;
   if (!match.length) return;
-  let matched = "";
+  let matched = '';
   for (const m of match) {
     if (event.label?.name?.toLowerCase() === m.toLowerCase()) {
       matched = m;
@@ -327,25 +303,17 @@ export const onMentioned = async (
     filter: { match: string[] };
   }
 ) => {
-  if (event.event !== "mentioned") {
+  if (event.event !== 'mentioned') {
     return;
   }
-  logger.info({ event }, "[api] Event: mentioned");
+  logger.info({ event }, '[api] Event: mentioned');
 
-  const {
-    event: eventType,
-    repoFullName,
-    issueNumber,
-    issueTitle,
-    filter,
-    id,
-    created_at,
-  } = event;
+  const { event: eventType, repoFullName, issueNumber, issueTitle, filter, id, created_at } = event;
   // filter
 
   const { match } = filter;
   if (!match.length) return;
-  let matched = "";
+  let matched = '';
   for (const m of match) {
     if (event.actor?.login === m) {
       matched = m;

@@ -21,21 +21,20 @@ export type CustomNotificationSettingsV1 = {
   repos: Record<string, RepoSettingV1>;
 };
 
-const customNotificationSettings =
-  storage.defineItem<CustomNotificationSettingsV1>(
-    "local:customNotificationSettings",
-    {
-      defaultValue: {
-        repos: {
-          // FIXME: This is just for testing, it should be empty by default
-          // "qiweiii/github-custom-notifier": {
-          //   labeled: ["good first issue", "help-wanted"],
-          //   mentioned: ["qiweiii"],
-          //   customCommented: ["urgent"],
-          // },
-        },
+const customNotificationSettings = storage.defineItem<CustomNotificationSettingsV1>(
+  'local:customNotificationSettings',
+  {
+    defaultValue: {
+      repos: {
+        // FIXME: This is just for testing, it should be empty by default
+        // "qiweiii/github-custom-notifier": {
+        //   labeled: ["good first issue", "help-wanted"],
+        //   mentioned: ["qiweiii"],
+        //   customCommented: ["urgent"],
+        // },
       },
-    }
-  );
+    },
+  }
+);
 
 export default customNotificationSettings;

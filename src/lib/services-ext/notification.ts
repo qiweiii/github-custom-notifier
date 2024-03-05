@@ -1,13 +1,10 @@
-import {
-  NotifyItemV1,
-  removeNotifyItemById,
-} from "../storage/customNotifications";
-import { queryPermission } from "./permissions";
-import { openTab } from "./tabs";
+import { NotifyItemV1, removeNotifyItemById } from '../storage/customNotifications';
+import { queryPermission } from './permissions';
+import { openTab } from './tabs';
 
 export function playNotificationSound() {
   const audio = new Audio();
-  audio.src = browser.runtime.getURL("/bell.ogg");
+  audio.src = browser.runtime.getURL('/bell.ogg');
   audio.play();
 }
 
@@ -33,15 +30,15 @@ export async function removeNotification(notificationId: string) {
 export function getNotificationObject(notifyItem: NotifyItemV1) {
   return {
     title: notifyItem.reason,
-    iconUrl: browser.runtime.getURL("/icon/128.png"),
-    type: "basic" as "basic",
+    iconUrl: browser.runtime.getURL('/icon/128.png'),
+    type: 'basic' as 'basic',
     message: notifyItem.repoName,
     contextMessage: `${notifyItem.issue.title} ${notifyItem.issue.title}`,
   };
 }
 
 export async function showNotifications(notifyItems: NotifyItemV1[]) {
-  const permissionGranted = await queryPermission("notifications");
+  const permissionGranted = await queryPermission('notifications');
   if (!permissionGranted) {
     return;
   }

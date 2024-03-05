@@ -1,4 +1,4 @@
-import { logger } from "../util";
+import { logger } from '../util';
 
 export async function queryPermission(permission: string) {
   try {

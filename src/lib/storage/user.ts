@@ -1,14 +1,9 @@
-import { Endpoints } from "@octokit/types";
+import { Endpoints } from '@octokit/types';
 
-export type userInfoStorageV1 =
-  | Endpoints["GET /user"]["response"]["data"]
-  | null;
+export type userInfoStorageV1 = Endpoints['GET /user']['response']['data'] | null;
 
-const userInfoStorage = storage.defineItem<userInfoStorageV1>(
-  "local:userInfoStorage",
-  {
-    defaultValue: null,
-  }
-);
+const userInfoStorage = storage.defineItem<userInfoStorageV1>('local:userInfoStorage', {
+  defaultValue: null,
+});
 
 export default userInfoStorage;

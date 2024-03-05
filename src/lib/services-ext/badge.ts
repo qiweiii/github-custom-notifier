@@ -1,10 +1,6 @@
-import * as defaults from "../defaults";
+import * as defaults from '../defaults';
 
-function render(
-  text: string,
-  color: [number, number, number, number],
-  title: string
-) {
+function render(text: string, color: [number, number, number, number], title: string) {
   browser.action.setBadgeText({ text });
   browser.action.setBadgeBackgroundColor({ color });
   browser.action.setTitle({ title });
@@ -12,11 +8,11 @@ function render(
 
 function getCountString(count: number) {
   if (count === 0) {
-    return "";
+    return '';
   }
 
   if (count > 9999) {
-    return "∞";
+    return '∞';
   }
 
   return String(count);

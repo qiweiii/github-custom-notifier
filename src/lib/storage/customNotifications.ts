@@ -5,7 +5,7 @@
  * Item will be removed when open item in new page or on mark read
  */
 
-import { logger } from "../util";
+import { logger } from '../util';
 
 /**
  * @deprecated - event based notification item is btter
@@ -92,24 +92,18 @@ export type CustomNotificationsV1 = {
   };
 };
 
-const customNotifications = storage.defineItem<CustomNotificationsV1>(
-  "local:customNotifications",
-  {
-    defaultValue: {
-      lastFetched: 0,
-      data: {},
-    },
-  }
-);
+const customNotifications = storage.defineItem<CustomNotificationsV1>('local:customNotifications', {
+  defaultValue: {
+    lastFetched: 0,
+    data: {},
+  },
+});
 
 /**
  * Save notification item by repo.
  * Deduplication is handled in this functions, if item already exists then it will be replaced.
  */
-export const saveNotifyItemByRepo = async (
-  repoName: string,
-  notifyItem: NotifyItemV1
-) => {
+export const saveNotifyItemByRepo = async (repoName: string, notifyItem: NotifyItemV1) => {
   const { data, lastFetched } = await customNotifications.getValue();
   if (!data[repoName]) {
     data[repoName] = {
@@ -126,10 +120,7 @@ export const saveNotifyItemByRepo = async (
     notifyItems.push(notifyItem);
   }
 
-  logger.info(
-    { data },
-    `[storage:customNotifications] Saved notification item by repo: ${repoName}`
-  );
+  logger.info({ data }, `[storage:customNotifications] Saved notification item by repo: ${repoName}`);
 
   // Finally save
   await customNotifications.setValue({ data, lastFetched });
@@ -149,10 +140,7 @@ export const removeNotifyItemById = async (notifyItemId: string) => {
     }
   }
 
-  logger.info(
-    { data },
-    `[storage:customNotifications] Removed notification item by id: ${notifyItemId}`
-  );
+  logger.info({ data }, `[storage:customNotifications] Removed notification item by id: ${notifyItemId}`);
 
   await customNotifications.setValue({ data, lastFetched: Date.now() });
 };

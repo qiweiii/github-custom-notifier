@@ -6,11 +6,14 @@
   "type": "module",
   "scripts": {
     "dev": "wxt",
-    "dev:firefox": "wxt -b firefox",
-    "build": "NODE_ENV=prod wxt build",
-    "build:firefox": "NODE_ENV=prod wxt build -b firefox",
+    "dev:firefox": "wxt -b firefox --mv3",
+    "build": "wxt build",
+    "build:edge": "wxt build -b edge",
+    "build:firefox": "wxt build -b firefox --mv3",
     "zip": "wxt zip",
-    "zip:firefox": "wxt zip -b firefox",
+    "zip:edge": "wxt zip -b edge",
+    "zip:firefox": "wxt zip -b firefox --mv3",
+    "zip:all": "pnpm run zip && pnpm run zip:edge && pnpm run zip:firefox",
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare"
   },

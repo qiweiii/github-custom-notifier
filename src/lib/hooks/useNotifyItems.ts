@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
-import customNotifications, {
-  CustomNotificationsV1,
-  NotifyItemV1,
-} from "../storage/customNotifications";
+import { useEffect, useState } from 'react';
+import customNotifications, { CustomNotificationsV1, NotifyItemV1 } from '../storage/customNotifications';
 
 const getItems = (value: CustomNotificationsV1) => {
   const { data, lastFetched } = value;

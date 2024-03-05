@@ -12,17 +12,14 @@ export type OptionsPageStorageV1 = {
   showDesktopNotif: boolean;
 };
 
-const optionsStorage = storage.defineItem<OptionsPageStorageV1>(
-  "local:optionsStorage",
-  {
-    defaultValue: {
-      token: "",
-      rootUrl: "https://github.com",
-      interval: 2,
-      playNotifSound: false,
-      showDesktopNotif: false,
-    },
-  }
-);
+const optionsStorage = storage.defineItem<OptionsPageStorageV1>('local:optionsStorage', {
+  defaultValue: {
+    token: '',
+    rootUrl: 'https://github.com',
+    interval: 2,
+    playNotifSound: false,
+    showDesktopNotif: false,
+  },
+});
 
 export default optionsStorage;

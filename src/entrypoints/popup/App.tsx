@@ -1,14 +1,14 @@
-import { useState } from "react";
-import Alert from "@mui/material/Alert";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Link from "@mui/material/Link";
-import Box from "@mui/material/Box";
+import { useState } from 'react';
+import Alert from '@mui/material/Alert';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Link from '@mui/material/Link';
+import Box from '@mui/material/Box';
 
-import "./App.css";
-import useOptionsState from "@/src/lib/hooks/useOptionsState";
-import Updates from "./components/Updates";
-import Settings from "./components/Settings";
+import './App.css';
+import useOptionsState from '@/src/lib/hooks/useOptionsState';
+import Updates from './components/Updates';
+import Settings from './components/Settings';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -21,7 +21,7 @@ function CustomTabPanel(props: TabPanelProps) {
 
   return (
     <div
-      role="tabpanel"
+      role='tabpanel'
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
@@ -35,7 +35,7 @@ function CustomTabPanel(props: TabPanelProps) {
 function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
   };
 }
 
@@ -51,28 +51,21 @@ function App() {
     <>
       {options.token ? null : (
         <Alert
-          severity="error"
+          severity='error'
           onClose={() => {
             browser.runtime.openOptionsPage();
           }}
         >
-          No access token, please set it in{" "}
-          <Link
-            onClick={() => browser.runtime.openOptionsPage()}
-            sx={{ cursor: "pointer" }}
-          >
+          No access token, please set it in{' '}
+          <Link onClick={() => browser.runtime.openOptionsPage()} sx={{ cursor: 'pointer' }}>
             Options Page
           </Link>
         </Alert>
       )}
 
-      <Tabs value={tabIdx} onChange={handleTabChange} variant="fullWidth">
-        <Tab label="Updates" {...a11yProps(0)} sx={{ textTransform: "none" }} />
-        <Tab
-          {...a11yProps(1)}
-          label="Settings"
-          sx={{ textTransform: "none" }}
-        />
+      <Tabs value={tabIdx} onChange={handleTabChange} variant='fullWidth'>
+        <Tab label='Updates' {...a11yProps(0)} sx={{ textTransform: 'none' }} />
+        <Tab {...a11yProps(1)} label='Settings' sx={{ textTransform: 'none' }} />
       </Tabs>
 
       <CustomTabPanel value={tabIdx} index={0}>
