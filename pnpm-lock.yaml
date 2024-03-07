@@ -56,10 +56,26 @@ devDependencies:
     specifier: ^5.3.3
     version: 5.3.3
   wxt:
-    specifier: ^0.15.0
-    version: 0.15.4
+    specifier: ^0.17.7
+    version: 0.17.7
 
 packages:
+
+  /@aklinker1/rollup-plugin-visualizer@5.12.0:
+    resolution: {integrity: sha512-X24LvEGw6UFmy0lpGJDmXsMyBD58XmX1bbwsaMLhNoM+UMQfQ3b2RtC+nz4b/NoRK5r6QJSKJHBNVeUdwqybaQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    peerDependencies:
+      rollup: 2.x || 3.x || 4.x
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      open: 8.4.2
+      picomatch: 2.3.1
+      source-map: 0.7.4
+      yargs: 17.7.2
+    dev: true
 
   /@alloc/quick-lru@5.2.0:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -2705,6 +2721,10 @@ packages:
       react-is: 16.13.1
     dev: false
 
+  /hookable@5.5.3:
+    resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
+    dev: true
+
   /html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
     dev: true
@@ -2750,10 +2770,6 @@ packages:
 
   /immediate@3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
-    dev: true
-
-  /immer@10.0.3:
-    resolution: {integrity: sha512-pwupu3eWfouuaowscykeckFmVTpqbzW+rXFCX8rQLkZzM9ftBmU/++Ra+o+L27mz03zJTlyV4UUr+fdKNffo4A==}
     dev: true
 
   /import-fresh@3.3.0:
@@ -3257,10 +3273,6 @@ packages:
 
   /make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
-    dev: true
-
-  /manage-path@2.0.0:
-    resolution: {integrity: sha512-NJhyB+PJYTpxhxZJ3lecIGgh4kwIY2RAh44XvAz9UlqthlQwtPBf62uBVR8XaD8CRuSjQ6TnZH2lNJkbLPZM2A==}
     dev: true
 
   /marky@1.2.5:
@@ -3884,8 +3896,8 @@ packages:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
     dev: true
 
-  /publish-browser-extension@2.1.2:
-    resolution: {integrity: sha512-g6+mtdR4Z+GYHPIrfaAwC7Kbt1oQlpJ8r0x1PAytScy33OFdK+HVUeDDYorBpPAiQlmYJRQga7rY9QVTyTw34g==}
+  /publish-browser-extension@2.1.3:
+    resolution: {integrity: sha512-qisnXUUwjvu5kMvObfG7UQ9rPU3t0XfbKdCdCrwAXaLUySdC25nlM4gxi+CBvL7LiwvK494GJyEK/weQBhIyTQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     dependencies:
@@ -4124,22 +4136,6 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.2.3
-    dev: true
-
-  /rollup-plugin-visualizer@5.12.0:
-    resolution: {integrity: sha512-8/NU9jXcHRs7Nnj07PF2o4gjxmm9lXIrZ8r175bT9dK8qoLlvKTwRMArRCMgpMGlq8CTLugRvEmyMeMXIU2pNQ==}
-    engines: {node: '>=14'}
-    hasBin: true
-    peerDependencies:
-      rollup: 2.x || 3.x || 4.x
-    peerDependenciesMeta:
-      rollup:
-        optional: true
-    dependencies:
-      open: 8.4.2
-      picomatch: 2.3.1
-      source-map: 0.7.4
-      yargs: 17.7.2
     dev: true
 
   /rollup@4.9.6:
@@ -4896,11 +4892,12 @@ packages:
         optional: true
     dev: true
 
-  /wxt@0.15.4:
-    resolution: {integrity: sha512-6M7igLCQpoV3dzxROhRPN3AvwN6dFNzUkxflS/a6rtWtxD4q6WS01mvbvWoYZn45BS1sb8gL4qehsTf4DtrG/g==}
+  /wxt@0.17.7:
+    resolution: {integrity: sha512-RSjn65tYUNhoHBtDwLjNmWrGtmQ62qLldekWCOtekl+Gzq1n/KcHm/M7QKhbJe7pxP8v5UvqcQEToW5oA9nwuA==}
     engines: {node: '>=18', pnpm: '>=8'}
     hasBin: true
     dependencies:
+      '@aklinker1/rollup-plugin-visualizer': 5.12.0
       '@types/webextension-polyfill': 0.10.7
       '@webext-core/fake-browser': 1.3.1
       '@webext-core/isolated-element': 1.1.1
@@ -4918,25 +4915,24 @@ packages:
       fs-extra: 11.2.0
       get-port: 7.0.0
       giget: 1.2.1
-      immer: 10.0.3
+      hookable: 5.5.3
       is-wsl: 3.1.0
       jiti: 1.21.0
       json5: 2.2.3
+      jszip: 3.10.1
       linkedom: 0.16.8
-      manage-path: 2.0.0
       minimatch: 9.0.3
       natural-compare: 1.4.0
       normalize-path: 3.0.0
+      nypm: 0.3.6
       ora: 7.0.1
       picocolors: 1.0.0
       prompts: 2.4.2
-      publish-browser-extension: 2.1.2
-      rollup-plugin-visualizer: 5.12.0
+      publish-browser-extension: 2.1.3
       unimport: 3.7.1
       vite: 5.1.3
       web-ext-run: 0.2.0
       webextension-polyfill: 0.10.0
-      zip-dir: 2.0.0
     transitivePeerDependencies:
       - '@types/node'
       - bufferutil

@@ -1,21 +1,68 @@
 import { useCallback, useEffect, useState } from 'react';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
 import { debounce } from '@mui/material/utils';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
-import { Button, SxProps } from '@mui/material';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { Button, SxProps, styled } from '@mui/material';
 
-import useSettingsState from '@/src/lib/hooks/useSettingsState';
+import useSettings from '@/src/lib/hooks/useSettingsState';
 import { RepoSettingV1 } from '@/src/lib/storage/customNotificationSettings';
 import { fetchLabels, searchRepos, searchUsers } from '@/src/lib/services-github';
 
+const Accordion = styled((props: AccordionProps) => (
+  <MuiAccordion disableGutters elevation={0} square {...(props || {})} />
+))(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  '&:not(:last-child)': {
+    borderBottom: 0,
+  },
+  '&::before': {
+    display: 'none',
+  },
+}));
+
+const AccordionSummary = styled((props: AccordionSummaryProps) => (
+  <MuiAccordionSummary expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />} {...(props || {})} />
+))(({ theme }) => ({
+  backgroundColor: 'rgba(255, 255, 255, .05)',
+  flexDirection: 'row-reverse',
+  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+    transform: 'rotate(90deg)',
+  },
+  '& .MuiAccordionSummary-content': {
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+  padding: theme.spacing(1),
+  borderTop: '1px solid rgba(0, 0, 0, .125)',
+}));
+
+const CssTextField = styled(TextField)`
+  label.Mui-focused {
+    color: #a0aab4;
+  }
+  label.MuiInputLabel-root {
+    font-size: 14px;
+  }
+  .MuiInput-underline:after {
+    border-bottom-color: #b2bac2;
+  }
+  .MuiFilledInput-root {
+    font-size: 12px;
+  }
+`;
+
 function CustomSearchInput({
   id,
-  handleChanged,
+  handleSelected,
   handleSingleChanged,
   repoName,
   value,
@@ -26,7 +73,7 @@ function CustomSearchInput({
   placeholder = 'Search',
 }: {
   id: string;
-  handleChanged?: (value: string[]) => void;
+  handleSelected?: (value: string[]) => void;
   handleSingleChanged?: (value: string) => void;
   repoName?: string;
   value?: string[];
@@ -40,6 +87,13 @@ function CustomSearchInput({
   const [options, setOptions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const labelText = {
+    labeled: 'Labeled',
+    mentioned: 'Mentioned',
+    customCommented: 'Commented',
+    name: 'Search',
+  }[part];
 
   const fetchOptions = useCallback(
     debounce(async (text: string) => {
@@ -62,7 +116,11 @@ function CustomSearchInput({
   );
 
   useEffect(() => {
+    setOptions([]);
+
     if (!inputValue) {
+      fetchOptions.clear();
+      setLoading(false);
       return;
     }
 
@@ -90,6 +148,9 @@ function CustomSearchInput({
       onClose={() => {
         setOpen(false);
       }}
+      onFocus={() => {
+        setOpen(true);
+      }}
       noOptionsText='No Options'
       // on user input change, search
       onInputChange={(event, newInputValue) => {
@@ -104,22 +165,17 @@ function CustomSearchInput({
 
         if (!multiple && handleSingleChanged && !Array.isArray(newValue)) {
           handleSingleChanged(newValue);
-        } else if (handleChanged && Array.isArray(newValue)) {
-          handleChanged(newValue);
+        } else if (handleSelected && Array.isArray(newValue)) {
+          handleSelected(newValue);
         }
       }}
       renderTags={(value: readonly string[], getTagProps) =>
         value.map((option: string, index: number) => (
-          <Chip variant='outlined' label={option} {...getTagProps({ index })} />
+          <Chip variant='outlined' size='small' label={option} {...getTagProps({ index })} />
         ))
       }
       renderInput={(params) => (
-        <TextField
-          {...params}
-          variant='filled'
-          label={part[0].toUpperCase() + part.slice(1)}
-          placeholder={placeholder}
-        />
+        <CssTextField {...params} size={params.size} variant='filled' label={labelText} placeholder={placeholder} />
       )}
     />
   );
@@ -128,123 +184,123 @@ function CustomSearchInput({
 function RepoItem({
   repoName,
   settings,
-  save,
-  delete,
+  deleteItem,
   handleChanged,
 }: {
   repoName: string;
   settings?: RepoSettingV1;
-  save: () => Promise<void>;
-  delete: (name: string) => void;
-  handleChanged: (settings: RepoSettingV1) => void;
+  deleteItem: (name: string) => void;
+  handleChanged: (settings: Omit<RepoSettingV1, 'createdAt'>) => void;
 }) {
   return (
-    <Box
+    <Accordion
       sx={{
-        padding: '8px',
-        width: 320,
-        border: '1px solid #ccc',
-        borderRadius: '4px',
+        h5: {
+          margin: 0,
+        },
       }}
     >
-      <label>
-        <h4 style={{ margin: 0 }}>{repoName}</h4>
-      </label>
-      <Box
+      <AccordionSummary aria-controls={`${repoName}-content`} id={`${repoName}-header`}>
+        <h5>{repoName}</h5>
+      </AccordionSummary>
+      <AccordionDetails
         sx={{
-          mt: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          rowGap: '4px',
+          mb: '8px',
         }}
       >
-        <CancelOutlinedIcon />
-        <h5>Labeled</h5>
-        <CustomSearchInput
-          repoName={repoName}
-          id={`gh-custom-notifier-labels-${repoName || ''}`}
-          handleChanged={(labeled) => {
-            handleChanged({
-              mentioned: settings?.mentioned || [],
-              customCommented: settings?.customCommented || [],
-              labeled,
-            });
-          }}
-          value={settings?.labeled}
-          multiple
-          part='labeled'
-          placeholder='e.g. good first issue, help wanted'
-          sx={{ ml: 2, width: '200px' }}
+        <CancelOutlinedIcon
+          onClick={() => deleteItem(repoName)}
+          sx={{ position: 'absolute', top: '12px', right: '12px', cursor: 'pointer' }}
         />
-      </Box>
-      <Box
-        sx={{
-          mt: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          rowGap: '4px',
-        }}
-      >
-        <h5>Mentioned</h5>
-        <CustomSearchInput
-          repoName={repoName}
-          id={`gh-custom-notifier-mentions-${repoName || ''}`}
-          handleChanged={(mentioned) => {
-            handleChanged({
-              labeled: settings?.labeled || [],
-              customCommented: settings?.customCommented || [],
-              mentioned,
-            });
+        <Box
+          sx={{
+            mt: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            rowGap: '4px',
           }}
-          value={settings?.mentioned}
-          multiple
-          part='mentioned'
-          placeholder='e.g. qiweiii'
-          sx={{ ml: 2, width: '200px' }}
-        />
-      </Box>
-      <Box
-        sx={{
-          mt: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          rowGap: '4px',
-        }}
-      >
-        <h5>Commented</h5>
-        <CustomSearchInput
-          repoName={repoName}
-          id={`gh-custom-notifier-commented-${repoName || ''}`}
-          handleChanged={(customCommented) => {
-            handleChanged({
-              labeled: settings?.labeled || [],
-              mentioned: settings?.mentioned || [],
-              customCommented,
-            });
+        >
+          <h5>Labeled</h5>
+          <CustomSearchInput
+            repoName={repoName}
+            id={`gh-custom-notifier-labels-${repoName || ''}`}
+            handleSelected={(labeled) => {
+              handleChanged({
+                mentioned: settings?.mentioned || [],
+                customCommented: settings?.customCommented || [],
+                labeled,
+              });
+            }}
+            value={settings?.labeled}
+            multiple
+            part='labeled'
+            placeholder='e.g. good first issue, help wanted'
+            sx={{ ml: 2, width: '220px' }}
+          />
+        </Box>
+        <Box
+          sx={{
+            mt: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            rowGap: '4px',
           }}
-          value={settings?.customCommented}
-          multiple
-          part='customCommented'
-          placeholder='e.g. urgent, important'
-          sx={{ ml: 2, width: '200px' }}
-        />
-      </Box>
-    </Box>
+        >
+          <h5>Mentioned</h5>
+          <CustomSearchInput
+            repoName={repoName}
+            id={`gh-custom-notifier-mentions-${repoName || ''}`}
+            handleSelected={(mentioned) => {
+              handleChanged({
+                labeled: settings?.labeled || [],
+                customCommented: settings?.customCommented || [],
+                mentioned,
+              });
+            }}
+            value={settings?.mentioned}
+            multiple
+            part='mentioned'
+            placeholder='e.g. qiweiii'
+            sx={{ ml: 2, width: '220px' }}
+          />
+        </Box>
+        <Box
+          sx={{
+            mt: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            rowGap: '4px',
+          }}
+        >
+          <h5>Commented</h5>
+          <CustomSearchInput
+            repoName={repoName}
+            id={`gh-custom-notifier-commented-${repoName || ''}`}
+            handleSelected={(customCommented) => {
+              handleChanged({
+                labeled: settings?.labeled || [],
+                mentioned: settings?.mentioned || [],
+                customCommented,
+              });
+            }}
+            value={settings?.customCommented}
+            multiple
+            part='customCommented'
+            placeholder='e.g. urgent, important'
+            sx={{ ml: 2, width: '220px' }}
+          />
+        </Box>
+      </AccordionDetails>
+    </Accordion>
   );
 }
 
 export default function Settings() {
-  const [settings, setSettings, save] = useSettingsState();
+  const [settings, setSettings] = useSettings();
   const [repoNameInput, setRepoNameInput] = useState('');
-
-  useEffect(() => {
-    return () => {
-      save(); // auto save on unmount
-    };
-  }, []);
 
   const valdiateRepoName = (name: string) => {
     if (name.includes('/')) {
@@ -254,42 +310,39 @@ export default function Settings() {
   };
 
   const addItem = (name: string) => {
+    if (!settings) return;
     // if exists, do nothing
     if (Object.keys(settings.repos).includes(name)) return;
 
-    setSettings(({ repos }) => ({
+    setSettings((settings) => ({
       repos: {
-        ...repos,
+        ...settings?.repos,
         [name]: {
           labeled: [],
           mentioned: [],
           customCommented: [],
+          createdAt: Date.now(),
         },
       },
     }));
-
-    // auto save
-    save();
   };
 
   const deleteItem = (name: string) => {
-    setSettings(({ repos }) => {
-      const newRepos = { ...repos };
+    if (!settings) return;
+    setSettings((settings) => {
+      const newRepos = { ...settings?.repos };
       delete newRepos[name];
       return {
         repos: newRepos,
       };
     });
-
-    // auto save
-    save();
-  }
+  };
 
   return (
     <div>
       <Box
         sx={{
-          mt: '4px',
+          my: '8px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -302,48 +355,44 @@ export default function Settings() {
           placeholder='e.g. qiweiii/github-custom-notifier'
           sx={{
             width: '200px',
-            mr: '12px',
+            mr: '10px',
           }}
         />
         <Button
           onClick={() => addItem(repoNameInput)}
           disabled={!valdiateRepoName(repoNameInput)}
           variant='outlined'
-          sx={{ textTransform: 'none', padding: '8px' }}
+          sx={{ textTransform: 'none', padding: '8px', fontSize: 14 }}
         >
           Add Repository
         </Button>
       </Box>
 
-      <Stack
-        gap={1}
-        sx={{
-          mt: '16px',
-          alignItems: 'center',
-          maxHeight: '380px',
-          overflowY: 'auto',
-        }}
-      >
-        {Object.entries(settings.repos).map(([name, settings]) => (
+      {Object.entries(settings?.repos || {})
+        .sort((a, b) => a[1].createdAt - b[1].createdAt)
+        .map(([repoName, settings]) => (
           <RepoItem
-            key={name}
-            repoName={name}
+            key={repoName}
+            repoName={repoName}
             settings={settings}
-            save={save}
-            delete={deleteItem}
+            deleteItem={deleteItem}
             handleChanged={(settings) => {
-              setSettings(({ repos }) => ({
-                repos: {
-                  ...repos,
-                  [name]: settings,
-                },
-              }));
-              // auto save
-              save();
+              setSettings((prevState) => {
+                if (!prevState) return prevState;
+                return {
+                  ...prevState,
+                  repos: {
+                    ...prevState.repos,
+                    [repoName]: {
+                      ...prevState.repos[repoName],
+                      ...settings,
+                    },
+                  },
+                };
+              });
             }}
           />
         ))}
-      </Stack>
     </div>
   );
 }

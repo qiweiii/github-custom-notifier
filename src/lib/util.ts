@@ -48,3 +48,11 @@ export const logger = pino({
     asObject: true,
   },
 });
+
+/**
+ * format: YYYY-MM-DDTHH:MM:SSZ
+ * need to remove milisecond
+ */
+export function getISO8601String(date: Date) {
+  return date.toISOString().split('.')[0] + 'Z';
+}

@@ -3,6 +3,8 @@ import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
+import { openTab } from '@/src/lib/services-ext';
+import { removeNotifyItemById } from '@/src/lib/storage/customNotifications';
 import useNotifyItems from '@/src/lib/hooks/useNotifyItems';
 
 export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => void }) {
@@ -58,8 +60,9 @@ export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => voi
             >
               <Box
                 key={item.id}
-                onClick={() => {
-                  browser.tabs.create({ url: item.link });
+                onClick={async () => {
+                  await removeNotifyItemById(item.id);
+                  openTab(item.link);
                 }}
                 sx={{
                   display: 'flex',
@@ -74,23 +77,26 @@ export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => voi
                   },
                 }}
               >
-                <Typography sx={{ fontSize: 11, color: '#444' }}>
+                <Typography sx={{ fontSize: 11, color: '#9f9f9f' }}>
                   {new Date(item.createdAt).toLocaleDateString() + ' ' + new Date(item.createdAt).toLocaleTimeString()}
                 </Typography>
 
                 <Typography
                   sx={{
-                    fontSize: 11,
+                    fontSize: 12,
                     textDecoration: 'underline',
                     display: 'inline',
                   }}
                 >
-                  <strong>{item.repoName}</strong>
+                  {item.repoName}
                 </Typography>
 
-                <Typography sx={{ fontSize: 11, textDecoration: 'underline' }}>
-                  <Typography sx={{ fontSize: 12, color: 'gray', display: 'inline' }}>#{item.issue.number} </Typography>
+                <Typography sx={{ fontSize: 12 }}>
                   {item.issue.title}
+                  <Typography component='span' sx={{ fontSize: 12, color: '#9f9f9f', display: 'inline' }}>
+                    {' '}
+                    <strong>#{item.issue.number}</strong>
+                  </Typography>
                 </Typography>
 
                 <Typography sx={{ fontSize: 12 }}>

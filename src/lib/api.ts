@@ -10,6 +10,7 @@ import customNotifications, {
   CustomNotificationsV1,
   NotifyItemV1,
   saveNotifyItemByRepo,
+  getUnreadInfo,
 } from './storage/customNotifications';
 import customNotificationSettings, {
   CustomNotificationSettingsV1,
@@ -29,7 +30,7 @@ import {
 } from './services-github';
 import { renderCount } from './services-ext/badge';
 import { playNotificationSound, showNotifications } from './services-ext';
-import { getGitHubOrigin, logger } from './util';
+import { getGitHubOrigin, getISO8601String, logger } from './util';
 
 // export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
 // export const ISSUE_EVENT_TYPES = new Set(["labeled", "mentioned"]);
@@ -44,33 +45,37 @@ export const fetchAndUpdate = async () => {
   logger.info('[api] Fetching and updating data');
   const newUpdatedAt = Date.now();
   const { lastFetched } = await customNotifications.getValue();
-  const lastFetchedISO = new Date(lastFetched).toISOString();
+  const lastFetchedISO = getISO8601String(new Date(lastFetched));
 
   const { repos } = await customNotificationSettings.getValue();
   const newEvents: any[] = [];
 
   for (const [repoFullName, repoSetting] of Object.entries(repos)) {
     const { labeled, mentioned, customCommented } = repoSetting;
+
+    // comments is special, cannot use issue events APIs, need to use issue comments API
     if (customCommented?.length) {
-      // comments is special, not using events APIs, need to use issue comments API to reduce number of requests
       let comments = [];
       if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
         // fetch more issue comments if lastFetched is not set or lastFetched is more than 2 hours ago
-        // FIXME: test using 2, actually should be 80
+        // FIXME: test using 2, actually should be 60
+        // FIXME: only fetch open issues?
         comments = await fetchNIssueComments(repoFullName, undefined, 2);
       } else {
         // otherwise, fetch based on lastFetched time
-        // FIXME: test using 1, actually should be 40
+        // FIXME: test using 1, actually should be 30
+        // FIXME: only fetch open issues?
         comments = await fetchNIssueComments(repoFullName, lastFetchedISO, 1);
       }
       logger.info(
         {
           lastFetchedISO,
-          newUpdatedAt,
+          newUpdatedAt: getISO8601String(new Date(newUpdatedAt)),
           comments,
         },
         `[api] Comments fetched for (since=${lastFetchedISO})`
       );
+
       for (const comment of comments) {
         const { updated_at, body, html_url, user } = comment;
         // "html_url": "https://github.com/octocat/Hello-World/issues/1347#issuecomment-1",
@@ -98,7 +103,7 @@ export const fetchAndUpdate = async () => {
           repoFullName,
           events,
         },
-        '[api] Latest 50 Issue Events fetched for'
+        '[api] Latest Issue Events fetched'
       );
       for (const event of events) {
         newEvents.push({
@@ -116,6 +121,11 @@ export const fetchAndUpdate = async () => {
 
   // Process newEvents array to NotifyItems
   for (const event of newEvents) {
+    // skip if event is earlier than lastFetched
+    if (lastFetched && new Date(event.created_at).getTime() < lastFetched) {
+      continue;
+    }
+    // process new event
     switch (event.event) {
       case 'custom-commented':
         await onCustomCommented(event);
@@ -171,7 +181,9 @@ const updateCount = async () => {
     },
     '[api] Update count: unReadCount, hasUpdatesAfterLastFetchedTime'
   );
+
   renderCount(unReadCount);
+
   const { playNotifSound, showDesktopNotif } = await optionsStorage.getValue();
   if (unReadCount && hasUpdatesAfterLastFetchedTime) {
     if (playNotifSound) {
@@ -181,25 +193,6 @@ const updateCount = async () => {
       showNotifications(items);
     }
   }
-};
-
-export const getUnreadInfo = async () => {
-  const { lastFetched, data } = await customNotifications.getValue();
-  let unReadCount = 0;
-  let hasUpdatesAfterLastFetchedTime = false;
-  const items: NotifyItemV1[] = [];
-  for (const repoName in data) {
-    const repoData = data[repoName];
-    const notifyItems = repoData.notifyItems;
-    for (const item of notifyItems) {
-      unReadCount++;
-      items.push(item);
-      if (item.createdAt > lastFetched) {
-        hasUpdatesAfterLastFetchedTime = true;
-      }
-    }
-  }
-  return { unReadCount, hasUpdatesAfterLastFetchedTime, items };
 };
 
 /**
@@ -235,13 +228,13 @@ export const onCustomCommented = async (event: {
   await saveNotifyItemByRepo(repoFullName, {
     id: `issuecomment-${id}`,
     eventType,
-    reason: `@${user} commented with "${matched}"`,
+    reason: `@${user} commented: "${matched}"`,
     createdAt: new Date(updated_at).getTime(),
     repoName: repoFullName,
     link: link,
     issue: {
       number: parseInt(issueNumber),
-      title: '',
+      title: 'Issue Number:',
     },
   });
 };
@@ -280,7 +273,7 @@ export const onLabeled = async (
   await saveNotifyItemByRepo(repoFullName, {
     id: `issueevent-${id}`,
     eventType,
-    reason: `Labeled with "${matched}"`,
+    reason: `Added label: "${matched}"`,
     // since label only has created_at, use it as createdAt
     createdAt: new Date(created_at).getTime(),
     repoName: repoFullName,
@@ -327,7 +320,7 @@ export const onMentioned = async (
   await saveNotifyItemByRepo(repoFullName, {
     id: `issueevent-${id}`,
     eventType,
-    reason: `@${match} mentioned in the issue`,
+    reason: `@${match} was mentioned in the issue`,
     // since label only has created_at, use it as createdAt
     createdAt: new Date(created_at).getTime(),
     repoName: repoFullName,

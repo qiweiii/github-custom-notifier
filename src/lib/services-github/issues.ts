@@ -50,6 +50,7 @@ export async function fetchNIssueComments(
   const { data } = await octokit.request('GET /repos/{owner}/{repo}/issues/comments', {
     owner: repoFullName.split('/')[0],
     repo: repoFullName.split('/')[1],
+    // updated since
     since,
     sort,
     page: 1,

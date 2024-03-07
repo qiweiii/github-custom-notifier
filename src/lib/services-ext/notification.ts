@@ -2,6 +2,12 @@ import { NotifyItemV1, removeNotifyItemById } from '../storage/customNotificatio
 import { queryPermission } from './permissions';
 import { openTab } from './tabs';
 
+/**
+ * `storage` usage in this module is only for browser notifications.
+ *
+ * So it not defined in `lib/storage`.
+ */
+
 export function playNotificationSound() {
   const audio = new Audio();
   audio.src = browser.runtime.getURL('/bell.ogg');
@@ -17,6 +23,7 @@ export async function openNotification(notificationId: string) {
   await closeNotification(notificationId);
   await removeNotification(notificationId);
 
+  // if notifyItem is already removed by click in extension popup, if will be null
   if (notifyItem) {
     await removeNotifyItemById(notifyItem.id);
     return openTab(notifyItem.link);

@@ -5,6 +5,7 @@
  * Item will be removed when open item in new page or on mark read
  */
 
+import { renderCount } from '../services-ext';
 import { logger } from '../util';
 
 /**
@@ -143,6 +144,40 @@ export const removeNotifyItemById = async (notifyItemId: string) => {
   logger.info({ data }, `[storage:customNotifications] Removed notification item by id: ${notifyItemId}`);
 
   await customNotifications.setValue({ data, lastFetched: Date.now() });
+
+  // side effect to update unread cound on extension badge
+  const { unReadCount } = await getUnreadInfo();
+  renderCount(unReadCount);
+};
+
+/**
+ * Get unread info from storage.
+ */
+export const getUnreadInfo = async () => {
+  const { lastFetched, data } = await customNotifications.getValue();
+  let unReadCount = 0;
+  let hasUpdatesAfterLastFetchedTime = false;
+  const items: NotifyItemV1[] = [];
+  for (const repoName in data) {
+    const repoData = data[repoName];
+    const notifyItems = repoData.notifyItems;
+    for (const item of notifyItems) {
+      unReadCount++;
+      items.push(item);
+      if (item.createdAt > lastFetched) {
+        hasUpdatesAfterLastFetchedTime = true;
+      }
+    }
+  }
+  logger.info(
+    {
+      unReadCount,
+      hasUpdatesAfterLastFetchedTime,
+      items,
+    },
+    '[storage:customNotifications] Get unread info'
+  );
+  return { unReadCount, hasUpdatesAfterLastFetchedTime, items };
 };
 
 export default customNotifications;

@@ -16,7 +16,7 @@ export default defineBackground(async () => {
   // window.addEventListener("online", startPollData);
   // window.addEventListener("offline", startPollData);
 
-  // Callback for notification click
+  // Callback for brower notification click
   const onNotificationClick = (id: string) => {
     openNotification(id);
   };
@@ -31,13 +31,15 @@ export default defineBackground(async () => {
     fetchAndUpdate();
   };
 
-  const options = await optionsStorage.getValue();
   // Initially, start polling data if token and rootUrl are set
+  const options = await optionsStorage.getValue();
   if (options.token && options.rootUrl) {
     logger.info({ options }, '[background] Token and rootUrl already set');
     await startPollData();
   }
+  // on alarm
   browser.alarms.onAlarm.addListener(fetchAndUpdate);
+
   // If api related configuration changed, re-fetch data immediately
   storage.watch<OptionsPageStorageV1>('local:optionsStorage', async (newValue, oldValue) => {
     if (newValue?.token && newValue?.rootUrl) {

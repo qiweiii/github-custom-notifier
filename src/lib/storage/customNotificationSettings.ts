@@ -12,6 +12,10 @@ export type RepoSettingV1 = {
    * Here, 'custom' means it it not GitHub's default event `commented` event type.
    */
   customCommented: string[]; // text to match in comment body: XXComponent, urgent, etc
+  /**
+   * Timestamp when this setting was created
+   */
+  createdAt: number;
 };
 
 export type CustomNotificationSettingsV1 = {
@@ -27,11 +31,12 @@ const customNotificationSettings = storage.defineItem<CustomNotificationSettings
     defaultValue: {
       repos: {
         // FIXME: This is just for testing, it should be empty by default
-        // "qiweiii/github-custom-notifier": {
-        //   labeled: ["good first issue", "help-wanted"],
-        //   mentioned: ["qiweiii"],
-        //   customCommented: ["urgent"],
-        // },
+        'qiweiii/github-custom-notifier': {
+          labeled: ['good first issue', 'help-wanted'],
+          mentioned: ['qiweiii'],
+          customCommented: ['urgent'],
+          createdAt: Date.now(),
+        },
       },
     },
   }

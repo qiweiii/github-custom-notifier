@@ -14,7 +14,7 @@ function App() {
             target='_blank'
             rel='noopener noreferrer'
           >
-            View Source Code
+            Source Code & Issues
           </a>
         </div>
 
@@ -86,6 +86,8 @@ function App() {
         </label>
       </section>
 
+      <hr className='my-5' />
+
       <section>
         <h3 className='text-xl my-2'>Notifications</h3>
         <label className='flex items-center'>
@@ -123,7 +125,7 @@ function App() {
 
       <hr className='my-5' />
 
-      <section>
+      {/* <section>
         <h3 className='text-xl'>Buy Me a Coffee!</h3>
         <p>
           If you like this extension, consider buying me a coffee. Your support will help me to continue maintaining
@@ -138,11 +140,11 @@ function App() {
         </a>
       </section>
 
-      <hr className='my-5' />
+      <hr className='my-5' /> */}
 
       <p>
-        Please save and click on Github Custom Notifier icon in the browser toolbar to configure which repos to receive
-        notifications from.
+        Please save and click on the "Github Custom Notifier" extension icon in the browser toolbar to configure which
+        repos to receive notifications from.
       </p>
 
       <button
