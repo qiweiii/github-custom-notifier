@@ -5,7 +5,7 @@ import customNotificationSettings, { CustomNotificationSettingsV1 } from '../sto
 /**
  * Settings hook with auto saving
  */
-export default function useSettings() {
+export default function useSettings({ onSave }: { onSave?: (state: CustomNotificationSettingsV1) => void }) {
   const [state, setState] = useState<CustomNotificationSettingsV1 | null>(null);
 
   useEffect(() => {
@@ -21,7 +21,9 @@ export default function useSettings() {
     // filter out empty repo names
     const repos = Object.fromEntries(Object.entries(state.repos).filter(([repoName]) => repoName));
     logger.info({ repos: repos }, '[popup page] Saving custom notification settings');
+    const changed = JSON.stringify(repos) !== JSON.stringify((await customNotificationSettings.getValue())?.repos);
     await customNotificationSettings.setValue({ repos });
+    if (onSave && changed) onSave(state);
   }, []);
 
   // auto save

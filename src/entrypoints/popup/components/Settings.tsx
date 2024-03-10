@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -9,9 +10,12 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import Tooltip from '@mui/material/Tooltip';
 import { Button, SxProps, styled } from '@mui/material';
 
-import useSettings from '@/src/lib/hooks/useSettingsState';
+import useSettings from '@/src/lib/hooks/useSettings';
 import { RepoSettingV1 } from '@/src/lib/storage/customNotificationSettings';
 import { fetchLabels, searchRepos, searchUsers } from '@/src/lib/services-github';
 
@@ -160,13 +164,27 @@ function CustomSearchInput({
       // on selected or value change
       onChange={(event, newValue, reason) => {
         if (!newValue) return;
-        // only call changed callbacks when selected
-        if (reason !== 'selectOption') return;
-
-        if (!multiple && handleSingleChanged && !Array.isArray(newValue)) {
-          handleSingleChanged(newValue);
-        } else if (handleSelected && Array.isArray(newValue)) {
-          handleSelected(newValue);
+        if (reason === 'selectOption') {
+          // only call changed callbacks when selected
+          if (multiple && handleSelected && Array.isArray(newValue)) {
+            // multiple select
+            handleSelected(newValue);
+          } else if (handleSingleChanged && !Array.isArray(newValue)) {
+            // single select
+            handleSingleChanged(newValue);
+          }
+        } else if (reason === 'removeOption') {
+          if (multiple && handleSelected && Array.isArray(newValue)) {
+            handleSelected(newValue);
+          } else if (handleSingleChanged) {
+            handleSingleChanged('');
+          }
+        } else if (reason === 'clear') {
+          if (multiple && handleSelected) {
+            handleSelected([]);
+          } else if (handleSingleChanged) {
+            handleSingleChanged('');
+          }
         }
       }}
       renderTags={(value: readonly string[], getTagProps) =>
@@ -185,17 +203,17 @@ function RepoItem({
   repoName,
   settings,
   deleteItem,
-  handleChanged,
+  handleChange,
 }: {
   repoName: string;
   settings?: RepoSettingV1;
   deleteItem: (name: string) => void;
-  handleChanged: (settings: Omit<RepoSettingV1, 'createdAt'>) => void;
+  handleChange: (settings: Omit<RepoSettingV1, 'createdAt'>) => void;
 }) {
   return (
     <Accordion
       sx={{
-        h5: {
+        'h5,h6': {
           margin: 0,
         },
       }}
@@ -226,7 +244,7 @@ function RepoItem({
             repoName={repoName}
             id={`gh-custom-notifier-labels-${repoName || ''}`}
             handleSelected={(labeled) => {
-              handleChanged({
+              handleChange({
                 mentioned: settings?.mentioned || [],
                 customCommented: settings?.customCommented || [],
                 labeled,
@@ -236,7 +254,7 @@ function RepoItem({
             multiple
             part='labeled'
             placeholder='e.g. good first issue, help wanted'
-            sx={{ ml: 2, width: '220px' }}
+            sx={{ ml: 2, width: '205px' }}
           />
         </Box>
         <Box
@@ -253,7 +271,7 @@ function RepoItem({
             repoName={repoName}
             id={`gh-custom-notifier-mentions-${repoName || ''}`}
             handleSelected={(mentioned) => {
-              handleChanged({
+              handleChange({
                 labeled: settings?.labeled || [],
                 customCommented: settings?.customCommented || [],
                 mentioned,
@@ -263,7 +281,7 @@ function RepoItem({
             multiple
             part='mentioned'
             placeholder='e.g. qiweiii'
-            sx={{ ml: 2, width: '220px' }}
+            sx={{ ml: 2, width: '205px' }}
           />
         </Box>
         <Box
@@ -275,12 +293,25 @@ function RepoItem({
             rowGap: '4px',
           }}
         >
-          <h5>Commented</h5>
+          <h5 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            Commented {/* <span> */}
+            <Tooltip
+              title={`Use * to match any text`}
+              arrow
+              placement='top'
+              sx={{
+                fontSize: 12,
+              }}
+            >
+              <InfoOutlinedIcon sx={{ fontSize: '0.9rem' }} />
+            </Tooltip>
+            {/* </span> */}
+          </h5>
           <CustomSearchInput
             repoName={repoName}
             id={`gh-custom-notifier-commented-${repoName || ''}`}
             handleSelected={(customCommented) => {
-              handleChanged({
+              handleChange({
                 labeled: settings?.labeled || [],
                 mentioned: settings?.mentioned || [],
                 customCommented,
@@ -290,7 +321,7 @@ function RepoItem({
             multiple
             part='customCommented'
             placeholder='e.g. urgent, important'
-            sx={{ ml: 2, width: '220px' }}
+            sx={{ ml: 2, width: '205px' }}
           />
         </Box>
       </AccordionDetails>
@@ -299,8 +330,9 @@ function RepoItem({
 }
 
 export default function Settings() {
-  const [settings, setSettings] = useSettings();
   const [repoNameInput, setRepoNameInput] = useState('');
+  const [openAlert, setOpenAlert] = useState(false);
+  const [settings, setSettings] = useSettings({ onSave: () => setOpenAlert(true) });
 
   const valdiateRepoName = (name: string) => {
     if (name.includes('/')) {
@@ -348,6 +380,17 @@ export default function Settings() {
           justifyContent: 'center',
         }}
       >
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={openAlert}
+          onClose={() => setOpenAlert(false)}
+          autoHideDuration={3000}
+        >
+          <Alert onClose={() => setOpenAlert(false)} severity='success' variant='filled' sx={{ width: '80%' }}>
+            Saved! 🎉 (Applies to Future Updates)
+          </Alert>
+        </Snackbar>
+
         <CustomSearchInput
           id={`gh-custom-notifier-repo-name`}
           handleSingleChanged={(name) => setRepoNameInput(name)}
@@ -376,7 +419,7 @@ export default function Settings() {
             repoName={repoName}
             settings={settings}
             deleteItem={deleteItem}
-            handleChanged={(settings) => {
+            handleChange={(settings) => {
               setSettings((prevState) => {
                 if (!prevState) return prevState;
                 return {

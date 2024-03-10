@@ -40,6 +40,9 @@ import { getGitHubOrigin, getISO8601String, logger } from './util';
  * Willed be used in background entrypoint to periodically poll data.
  *
  * IMPT: this function may take some time if there are too many events to process.
+ *
+ * Rate Limit: Github public 5000/hour, Github Enterprise 15000/hour
+ * Assume 30 repos, 30 * 2 * 30 = 1800 events per hour, so it should be safe.
  */
 export const fetchAndUpdate = async () => {
   logger.info('[api] Fetching and updating data');
@@ -216,14 +219,20 @@ export const onCustomCommented = async (event: {
   // filter
   const { match } = filter;
   if (!match.length) return;
+
   let matched = '';
-  for (const m of match) {
-    if (body.includes(m)) {
-      matched = m;
-      break;
+
+  if (match.includes('*')) {
+    matched = body;
+  } else {
+    for (const m of match) {
+      if (body.includes(m)) {
+        matched = m;
+        break;
+      }
     }
+    if (!matched) return;
   }
-  if (!matched) return;
 
   await saveNotifyItemByRepo(repoFullName, {
     id: `issuecomment-${id}`,
@@ -254,7 +263,7 @@ export const onLabeled = async (
     return;
   }
   logger.info({ event }, '[api] Event: labeled');
-  const { id, event: eventType, repoFullName, issueNumber, issueTitle, filter, created_at } = event;
+  const { actor, id, event: eventType, repoFullName, issueNumber, issueTitle, filter, created_at } = event;
 
   // filter
   const { match } = filter;
@@ -273,7 +282,7 @@ export const onLabeled = async (
   await saveNotifyItemByRepo(repoFullName, {
     id: `issueevent-${id}`,
     eventType,
-    reason: `Added label: "${matched}"`,
+    reason: `${actor?.login ? '@' + actor?.login + ' added ' : 'Added'} label: "${matched}"`,
     // since label only has created_at, use it as createdAt
     createdAt: new Date(created_at).getTime(),
     repoName: repoFullName,
