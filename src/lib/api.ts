@@ -17,8 +17,9 @@ import customNotificationSettings, {
   RepoSettingV1,
 } from './storage/customNotificationSettings';
 import {
-  fetchTimelineEvents,
+  fetchIssueTimelineEvents,
   fetchIssueEventsByRepo,
+  fetchActivityEventsByRepo,
   fetchAuthedUser,
   fetchIssueDetails,
   fetchNIssues,
@@ -97,9 +98,9 @@ export const fetchAndUpdate = async () => {
       }
     }
 
+    // issue events API handling
+    // NOTE: issue events endpoint does not provide a `since` param, so get latest 40 and dedup before adding to strage.
     {
-      // issue events API handling
-      // NOTE: issue events endpoint does not provide a `since` param, so get latest 40 and dedup before adding to strage.
       const events = await fetchIssueEventsByRepo(repoFullName);
       logger.info(
         {

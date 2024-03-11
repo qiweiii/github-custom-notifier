@@ -13,7 +13,7 @@ export type RepoSettingV1 = {
    */
   customCommented: string[]; // text to match in comment body: XXComponent, urgent, etc
   /**
-   * Timestamp when this setting was created
+   * Timestamp when this setting was created by user
    */
   createdAt: number;
 };
