@@ -67,7 +67,8 @@ export async function fetchLabels(repoFullName: string) {
   const { data } = await octokit.request('GET /repos/{owner}/{repo}/labels', {
     owner: repoFullName.split('/')[0],
     repo: repoFullName.split('/')[1],
-    per_page: 20,
+    // TODO: if more than 100 labels, need to fetch next page. Better to use seatchLabels but it require repo_id
+    per_page: 100,
   });
   return data;
 }

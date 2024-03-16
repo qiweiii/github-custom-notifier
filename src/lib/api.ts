@@ -61,15 +61,13 @@ export const fetchAndUpdate = async () => {
     if (customCommented?.length) {
       let comments = [];
       if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
-        // fetch more issue comments if lastFetched is not set or lastFetched is more than 2 hours ago
-        // FIXME: test using 2, actually should be 60
+        // fetch more issue comments if lastFetched is not set or when lastFetched is > 2 hours ago
         // FIXME: only fetch open issues?
-        comments = await fetchNIssueComments(repoFullName, undefined, 2);
+        comments = await fetchNIssueComments(repoFullName, undefined, 60);
       } else {
         // otherwise, fetch based on lastFetched time
-        // FIXME: test using 1, actually should be 30
         // FIXME: only fetch open issues?
-        comments = await fetchNIssueComments(repoFullName, lastFetchedISO, 1);
+        comments = await fetchNIssueComments(repoFullName, lastFetchedISO, 30);
       }
       logger.info(
         {

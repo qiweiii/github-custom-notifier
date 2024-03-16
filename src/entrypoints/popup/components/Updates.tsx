@@ -56,6 +56,7 @@ export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => voi
         >
           {notifyItems.map((item) => (
             <Box
+              key={item.id}
               sx={{
                 position: 'relative',
                 display: 'flex',

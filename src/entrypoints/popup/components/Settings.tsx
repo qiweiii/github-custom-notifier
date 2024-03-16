@@ -106,8 +106,8 @@ function CustomSearchInput({
         const data = await searchRepos(text);
         setOptions(data.items.map((repo) => repo.full_name));
       } else if (part === 'labeled') {
-        const data = await fetchLabels(text);
-        setOptions(data.map((label) => label.name));
+        const data = await fetchLabels(repoName || '');
+        setOptions(data.map(({ name }) => name) || []);
       } else if (part === 'mentioned') {
         const data = await searchUsers(text);
         setOptions(data.items.map((user) => user.login));
