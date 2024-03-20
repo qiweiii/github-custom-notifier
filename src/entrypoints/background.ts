@@ -19,7 +19,7 @@ export default defineBackground(async () => {
   // window.addEventListener("online", startPollData);
   // window.addEventListener("offline", startPollData);
 
-  // Callback for brower notification click
+  // Callback for notification (os notification) click
   const onNotificationClick = (id: string) => {
     openNotification(id);
   };

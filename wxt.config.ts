@@ -21,7 +21,7 @@ export default defineConfig({
       '96': 'icon/96.png',
       '128': 'icon/128.png',
     },
-    permissions: ['alarms', 'storage', 'tabs'],
+    permissions: ['alarms', 'storage', 'tabs', 'offscreen'],
     optional_permissions: ['notifications'],
     browser_action: {
       default_icon: 'icon/icon-toolbar.png',

@@ -17,7 +17,7 @@ const getItems = (value: CustomNotificationsV1) => {
       // }
     }
   }
-  return items;
+  return items.sort((a, b) => b.createdAt - a.createdAt);
 };
 
 export default function useNotifyItems() {

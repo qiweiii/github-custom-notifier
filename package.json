@@ -2,7 +2,7 @@
   "name": "github-custom-notifier",
   "description": "This web extension allows you to customize which GitHub Event to be notified",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

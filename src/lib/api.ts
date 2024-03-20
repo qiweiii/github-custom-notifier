@@ -8,7 +8,7 @@ import customNotifications, { saveNotifyItemByRepo, getUnreadInfo } from './stor
 import customNotificationSettings from './storage/customNotificationSettings';
 import { fetchIssueEventsByRepo, fetchNIssueComments, OctokitIssueEvent } from './services-github';
 import { renderCount } from './services-ext/badge';
-import { playNotificationSound, showNotifications } from './services-ext';
+import { queryPermission, showNotifications } from './services-ext';
 import { getGitHubOrigin, getISO8601String, logger } from './util';
 
 // export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
@@ -165,7 +165,7 @@ const updateCount = async () => {
   const { playNotifSound, showDesktopNotif } = await optionsStorage.getValue();
   if (unReadCount && hasUpdatesAfterLastFetchedTime) {
     if (playNotifSound) {
-      playNotificationSound();
+      playSound();
     }
     if (showDesktopNotif) {
       showNotifications(items);
@@ -212,7 +212,7 @@ export const onCustomCommented = async (event: {
   await saveNotifyItemByRepo(repoFullName, {
     id: `issuecomment-${id}`,
     eventType,
-    reason: `@${user} commented: "${matched}"`,
+    reason: `@${user} commented: "${matched.length > 40 ? matched.slice(40) + '...' : matched}"`,
     createdAt: new Date(updated_at).getTime(),
     repoName: repoFullName,
     link: link,
@@ -257,7 +257,7 @@ export const onLabeled = async (
   await saveNotifyItemByRepo(repoFullName, {
     id: `issueevent-${id}`,
     eventType,
-    reason: `${actor?.login ? '@' + actor?.login + ' added ' : 'Added'} label: "${matched}"`,
+    reason: `${actor?.login ? '@' + actor?.login + ' added' : 'Added'} label: "${matched}"`,
     // since label only has created_at, use it as createdAt
     createdAt: new Date(created_at).getTime(),
     repoName: repoFullName,
@@ -315,3 +315,28 @@ export const onMentioned = async (
     },
   });
 };
+
+/**
+ * Plays audio files from extension service workers
+ * @param source - path of the audio file
+ * @param volume - volume of the playback
+ */
+export async function playSound(source = 'bell.ogg', volume = 1) {
+  if (await queryPermission('offscreen')) {
+    await createOffscreen();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await browser.runtime.sendMessage({ play: { source, volume } });
+  }
+}
+
+// Create the offscreen document if it doesn't already exist
+async function createOffscreen() {
+  // @ts-ignore
+  if (await browser.offscreen.hasDocument()) return;
+  // @ts-ignore
+  await browser.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: ['AUDIO_PLAYBACK'],
+    justification: 'sound for notifications',
+  });
+}

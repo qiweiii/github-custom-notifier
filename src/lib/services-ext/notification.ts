@@ -8,12 +8,6 @@ import { openTab } from './tabs';
  * So it not defined in `lib/storage`.
  */
 
-export function playNotificationSound() {
-  const audio = new Audio();
-  audio.src = browser.runtime.getURL('/bell.ogg');
-  audio.play();
-}
-
 export async function closeNotification(notificationId: string) {
   return browser.notifications.clear(notificationId);
 }
