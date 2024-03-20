@@ -90,7 +90,7 @@ export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => voi
               </Button>
 
               <Tooltip
-                title={`Open in a new tab and mark as read`}
+                title={`Open and mark as read`}
                 arrow
                 key={item.id}
                 placement='top'

@@ -3,32 +3,10 @@
  * it accesses storages and integrate functions in `services-github/` and `services-ext/`.
  */
 
-import { getOctokit } from './octokit';
-import optionsStorage, { OptionsPageStorageV1 } from './storage/options';
-import userInfoStorage, { userInfoStorageV1 } from './storage/user';
-import customNotifications, {
-  CustomNotificationsV1,
-  NotifyItemV1,
-  saveNotifyItemByRepo,
-  getUnreadInfo,
-} from './storage/customNotifications';
-import customNotificationSettings, {
-  CustomNotificationSettingsV1,
-  RepoSettingV1,
-} from './storage/customNotificationSettings';
-import {
-  fetchIssueTimelineEvents,
-  fetchIssueEventsByRepo,
-  fetchActivityEventsByRepo,
-  fetchAuthedUser,
-  fetchIssueDetails,
-  fetchNIssues,
-  fetchNIssueComments,
-  fetchRepoDetails,
-  searchRepos,
-  searchUsers,
-  OctokitIssueEvent,
-} from './services-github';
+import optionsStorage from './storage/options';
+import customNotifications, { saveNotifyItemByRepo, getUnreadInfo } from './storage/customNotifications';
+import customNotificationSettings from './storage/customNotificationSettings';
+import { fetchIssueEventsByRepo, fetchNIssueComments, OctokitIssueEvent } from './services-github';
 import { renderCount } from './services-ext/badge';
 import { playNotificationSound, showNotifications } from './services-ext';
 import { getGitHubOrigin, getISO8601String, logger } from './util';
@@ -62,11 +40,9 @@ export const fetchAndUpdate = async () => {
       let comments = [];
       if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
         // fetch more issue comments if lastFetched is not set or when lastFetched is > 2 hours ago
-        // FIXME: only fetch open issues?
         comments = await fetchNIssueComments(repoFullName, undefined, 60);
       } else {
         // otherwise, fetch based on lastFetched time
-        // FIXME: only fetch open issues?
         comments = await fetchNIssueComments(repoFullName, lastFetchedISO, 30);
       }
       logger.info(

@@ -12,7 +12,10 @@ export default defineBackground(async () => {
     }
   });
 
-  // TODO: need to somehow handle this in mv3
+  // TODO: need to somehow handle this in mv3.
+  // In MV3, background script is a service worker, so not possible to listen to window `online` and `offline` events.
+  // MV3 has an offscreen API but not easy to use.
+  // All good, seems this works without handling online/offline events.
   // window.addEventListener("online", startPollData);
   // window.addEventListener("offline", startPollData);
 
