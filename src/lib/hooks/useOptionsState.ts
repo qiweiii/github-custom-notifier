@@ -31,7 +31,7 @@ export default function useOptionsState() {
     });
 
     if (state.showDesktopNotif) {
-      requestPermission('notifications');
+      await requestPermission('notifications');
     }
   };
 

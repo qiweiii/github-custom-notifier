@@ -165,8 +165,7 @@ const updateCount = async () => {
   const { playNotifSound, showDesktopNotif } = await optionsStorage.getValue();
   if (unReadCount && hasUpdatesAfterLastFetchedTime) {
     if (playNotifSound) {
-      // TODO: offscreen audio does not work, need to research more. Maybe ask Wxt for help
-      // playSound();
+      await playSound();
     }
     if (showDesktopNotif) {
       showNotifications(items);
@@ -319,6 +318,7 @@ export const onMentioned = async (
 
 /**
  * Plays audio files from extension service workers
+ *
  * @param source - path of the audio file
  * @param volume - volume of the playback
  */
