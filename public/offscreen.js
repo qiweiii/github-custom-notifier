@@ -8,3 +8,8 @@ function playAudio({ source, volume }) {
   audio.volume = volume;
   audio.play();
 }
+
+// Keep service worker alive
+setInterval(async () => {
+  (await navigator.serviceWorker.ready).active.postMessage('keepAlive');
+}, 20e3);

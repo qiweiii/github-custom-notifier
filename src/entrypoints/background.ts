@@ -12,10 +12,6 @@ export default defineBackground(async () => {
     }
   });
 
-  // TODO: need to somehow handle this in mv3.
-  // window.addEventListener("online", startPollData);
-  // window.addEventListener("offline", startPollData);
-
   // Callback for notification (os notification) click
   const onNotificationClick = (id: string) => {
     openNotification(id);
@@ -47,4 +43,19 @@ export default defineBackground(async () => {
       await startPollData();
     }
   });
+
+  // Code for keeping service worker running
+  async function createOffscreenForAlive() {
+    // @ts-ignore
+    await browser.offscreen
+      .createDocument({
+        url: 'offscreen-alive.html',
+        reasons: ['BLOBS'],
+        justification: 'keep service worker running',
+      })
+      .catch(() => {});
+  }
+  browser.runtime.onStartup.addListener(createOffscreenForAlive);
+  self.onmessage = (e) => {}; // keepAlive
+  createOffscreenForAlive();
 });
