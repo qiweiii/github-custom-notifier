@@ -335,7 +335,11 @@ export async function playSound(source = 'bell.ogg', volume = 1) {
   if (await queryPermission('offscreen')) {
     await createOffscreen();
     await new Promise((resolve) => setTimeout(resolve, 100));
-    await browser.runtime.sendMessage({ play: { source, volume } });
+    try {
+      await browser.runtime.sendMessage({ play: { source, volume } });
+    } catch {
+      // not critical, ignore
+    }
   }
 }
 
@@ -345,10 +349,14 @@ const palySoundDebounced = debounce(playSound, 600);
 async function createOffscreen() {
   // @ts-ignore
   if (await browser.offscreen.hasDocument()) return;
-  // @ts-ignore
-  await browser.offscreen.createDocument({
-    url: 'offscreen.html',
-    reasons: ['AUDIO_PLAYBACK'],
-    justification: 'sound for notifications',
-  });
+  try {
+    // @ts-ignore
+    await browser.offscreen.createDocument({
+      url: 'offscreen.html',
+      reasons: ['AUDIO_PLAYBACK'],
+      justification: 'sound for notifications',
+    });
+  } catch {
+    // not critical, ignore
+  }
 }

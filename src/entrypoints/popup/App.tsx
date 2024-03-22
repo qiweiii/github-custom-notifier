@@ -48,10 +48,10 @@ function App() {
     setTabIdx(newValue);
   };
 
-  // useEffect(() => {
-  //   // a fallback if sometimes background does not wake up, start polling data when user open popup
-  //   startPollData();
-  // }, []);
+  useEffect(() => {
+    // a fallback if sometimes background does not wake up, start polling data when user open popup
+    startPollData();
+  }, []);
 
   return (
     <>

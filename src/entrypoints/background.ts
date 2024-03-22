@@ -1,4 +1,4 @@
-import { fetchAndUpdate, startPollData } from '../lib/api';
+import { fetchAndUpdate, playSound, startPollData } from '../lib/api';
 import { openNotification, queryPermission } from '../lib/services-ext';
 import optionsStorage, { OptionsPageStorageV1 } from '../lib/storage/options';
 import { logger } from '../lib/util';
@@ -42,7 +42,14 @@ export default defineBackground(() => {
 
   // Seems any chrome.runtime API event can help wake up the service worker.
   // See <https://groups.google.com/a/chromium.org/g/chromium-extensions/c/ASRLlIZVb6I>
+  // But this does not work all the time... so added the content script
   browser.runtime.onStartup.addListener(() => {
     // do nothing
+  });
+
+  browser.runtime.onMessage.addListener((msg) => {
+    if (msg?.type === 'ping') {
+      // do nothing
+    }
   });
 });
