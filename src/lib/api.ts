@@ -14,6 +14,13 @@ import { getGitHubOrigin, getISO8601String, logger } from './util';
 // export const TIMELINE_EVENT_TYPES = new Set(["commented"]);
 // export const ISSUE_EVENT_TYPES = new Set(["labeled", "mentioned"]);
 
+// Poll data loop
+export const startPollData = async () => {
+  logger.info('[background] Starting poll data loop');
+  await browser.alarms.clearAll();
+  fetchAndUpdate();
+};
+
 /**
  * Call github api to get events data, process them to notifications, and store them in storage.
  * Willed be used in background entrypoint to periodically poll data.

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -9,6 +9,7 @@ import './App.css';
 import useOptionsState from '@/src/lib/hooks/useOptionsState';
 import Updates from './components/Updates';
 import Settings from './components/Settings';
+import { startPollData } from '@/src/lib/api';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,6 +47,11 @@ function App() {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabIdx(newValue);
   };
+
+  // useEffect(() => {
+  //   // a fallback if sometimes background does not wake up, start polling data when user open popup
+  //   startPollData();
+  // }, []);
 
   return (
     <>
