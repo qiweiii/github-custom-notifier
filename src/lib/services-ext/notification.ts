@@ -34,7 +34,7 @@ export function getNotificationObject(notifyItem: NotifyItemV1) {
     iconUrl: browser.runtime.getURL('/icon/128.png'),
     type: 'basic' as 'basic',
     message: notifyItem.repoName,
-    contextMessage: `${notifyItem.issue.title} ${notifyItem.issue.title}`,
+    contextMessage: `${notifyItem.issue.title} #${notifyItem.issue.number}`,
   };
 }
 
