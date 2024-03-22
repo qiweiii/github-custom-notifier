@@ -94,6 +94,7 @@ export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => voi
                 arrow
                 key={item.id}
                 placement='top'
+                PopperProps={{ disablePortal: true }}
                 slotProps={{
                   popper: {
                     modifiers: [

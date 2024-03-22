@@ -134,8 +134,7 @@ function CustomSearchInput({
   return (
     <Autocomplete
       multiple={multiple}
-      // includeInputInList
-      freeSolo
+      includeInputInList
       id={id}
       size='small'
       aria-placeholder={placeholder}
