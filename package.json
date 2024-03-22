@@ -22,6 +22,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
+    "lodash": "^4.17.21",
     "octokit": "^3.1.2",
     "pino": "^8.18.0",
     "react": "^18.2.0",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@octokit/types": "^12.4.0",
+    "@types/lodash": "^4.17.0",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",

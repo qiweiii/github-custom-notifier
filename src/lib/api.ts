@@ -3,6 +3,8 @@
  * it accesses storages and integrate functions in `services-github/` and `services-ext/`.
  */
 
+import { debounce } from 'lodash';
+
 import optionsStorage from './storage/options';
 import customNotifications, { saveNotifyItemByRepo, getUnreadInfo } from './storage/customNotifications';
 import customNotificationSettings from './storage/customNotificationSettings';
@@ -172,7 +174,7 @@ const updateCount = async () => {
   const { playNotifSound, showDesktopNotif } = await optionsStorage.getValue();
   if (unReadCount && hasUpdatesAfterLastFetchedTime) {
     if (playNotifSound) {
-      await playSound();
+      await palySoundDebounced();
     }
     if (showDesktopNotif) {
       showNotifications(items);
@@ -332,10 +334,12 @@ export const onMentioned = async (
 export async function playSound(source = 'bell.ogg', volume = 1) {
   if (await queryPermission('offscreen')) {
     await createOffscreen();
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     await browser.runtime.sendMessage({ play: { source, volume } });
   }
 }
+
+const palySoundDebounced = debounce(playSound, 600);
 
 // Create the offscreen document if it doesn't already exist
 async function createOffscreen() {
