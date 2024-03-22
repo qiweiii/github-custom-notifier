@@ -3,7 +3,7 @@ import { openNotification, queryPermission } from '../lib/services-ext';
 import optionsStorage, { OptionsPageStorageV1 } from '../lib/storage/options';
 import { logger } from '../lib/util';
 
-export default defineBackground(async () => {
+export default defineBackground(() => {
   // Open options page after extension installed
   browser.runtime.onInstalled.addListener(({ reason }) => {
     if (reason === 'install') {
@@ -16,9 +16,11 @@ export default defineBackground(async () => {
   const onNotificationClick = (id: string) => {
     openNotification(id);
   };
-  if (await queryPermission('notifications')) {
-    browser.notifications.onClicked.addListener(onNotificationClick);
-  }
+  queryPermission('notifications').then((granted) => {
+    if (granted) {
+      browser.notifications.onClicked.addListener(onNotificationClick);
+    }
+  });
 
   // Poll data loop
   const startPollData = async () => {
@@ -28,11 +30,12 @@ export default defineBackground(async () => {
   };
 
   // Initially, start polling data if token and rootUrl are set
-  const options = await optionsStorage.getValue();
-  if (options.token && options.rootUrl) {
-    logger.info({ options }, '[background] Token and rootUrl already set');
-    await startPollData();
-  }
+  optionsStorage.getValue().then(async (options) => {
+    if (options.token && options.rootUrl) {
+      logger.info({ options }, '[background] Token and rootUrl already set');
+      await startPollData();
+    }
+  });
   // on alarm
   browser.alarms.onAlarm.addListener(fetchAndUpdate);
 
@@ -44,18 +47,9 @@ export default defineBackground(async () => {
     }
   });
 
-  // Code for keeping service worker running
-  async function createOffscreenForAlive() {
-    // @ts-ignore
-    await browser.offscreen
-      .createDocument({
-        url: 'offscreen-alive.html',
-        reasons: ['BLOBS'],
-        justification: 'keep service worker running',
-      })
-      .catch(() => {});
-  }
-  browser.runtime.onStartup.addListener(createOffscreenForAlive);
-  self.onmessage = (e) => {}; // keepAlive
-  createOffscreenForAlive();
+  // Seems any chrome.runtime API event can help wake up the service worker.
+  // See <https://groups.google.com/a/chromium.org/g/chromium-extensions/c/ASRLlIZVb6I>
+  browser.runtime.onStartup.addListener(() => {
+    // do nothing
+  });
 });
