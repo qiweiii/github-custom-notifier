@@ -43,8 +43,7 @@ export async function fetchCommentById(repoFullName: string, commentId: number) 
 export async function fetchNIssueComments(
   repoFullName: string,
   since?: string, // in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ
-  n: number = 40,
-  sort: 'updated' | 'created' = 'updated'
+  n: number = 40
 ) {
   const octokit = await getOctokit();
   const { data } = await octokit.request('GET /repos/{owner}/{repo}/issues/comments', {
@@ -52,7 +51,8 @@ export async function fetchNIssueComments(
     repo: repoFullName.split('/')[1],
     // updated since
     since,
-    sort,
+    direction: 'desc',
+    sort: 'updated',
     page: 1,
     per_page: n,
   });
