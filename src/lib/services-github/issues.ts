@@ -64,11 +64,17 @@ export async function fetchNIssueComments(
  */
 export async function fetchLabels(repoFullName: string) {
   const octokit = await getOctokit();
-  const { data } = await octokit.request('GET /repos/{owner}/{repo}/labels', {
+  const { data: page1 } = await octokit.request('GET /repos/{owner}/{repo}/labels', {
     owner: repoFullName.split('/')[0],
     repo: repoFullName.split('/')[1],
-    // TODO: if more than 100 labels, need to fetch next page. Better to use seatchLabels but it require repo_id
     per_page: 100,
+    page: 1,
   });
-  return data;
+  const { data: page2 } = await octokit.request('GET /repos/{owner}/{repo}/labels', {
+    owner: repoFullName.split('/')[0],
+    repo: repoFullName.split('/')[1],
+    per_page: 100,
+    page: 2,
+  });
+  return [...page1, ...page2];
 }
