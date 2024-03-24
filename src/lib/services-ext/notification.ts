@@ -48,10 +48,13 @@ export async function showNotifications(notifyItems: NotifyItemV1[]) {
     const notificationId = `local:GH-CUSTOM-NOTIFIER-${notification.id}`;
     const notificationObject = getNotificationObject(notification);
 
-    await browser.notifications.create(notificationId, notificationObject);
-    await storage.setItem(notificationId, notification);
+    const existing = await storage.getItem<NotifyItemV1>(notificationId);
 
-    await delay(50);
+    if (!existing) {
+      await browser.notifications.create(notificationId, notificationObject);
+      await storage.setItem(notificationId, notification);
+      await delay(50);
+    }
   }
 }
 
