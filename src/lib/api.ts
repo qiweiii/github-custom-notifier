@@ -8,7 +8,7 @@ import { debounce } from 'lodash';
 import optionsStorage from './storage/options';
 import customNotifications, { saveNotifyItemByRepo, getUnreadInfo } from './storage/customNotifications';
 import customNotificationSettings from './storage/customNotificationSettings';
-import { fetchIssueEventsByRepo, fetchNIssueComments, OctokitIssueEvent } from './services-github';
+import { fetchIssueEventsByRepo, fetchNIssueComments, fetchNIssues, OctokitIssueEvent } from './services-github';
 import { renderCount } from './services-ext/badge';
 import { queryPermission, showNotifications } from './services-ext';
 import { getGitHubOrigin, getISO8601String, logger } from './util';
@@ -44,19 +44,26 @@ export const fetchAndUpdate = async () => {
   for (const [repoFullName, repoSetting] of Object.entries(repos)) {
     const { labeled, mentioned, customCommented } = repoSetting;
 
-    // comments is special, cannot use issue events APIs, need to use issue comments API
+    // Comments is special, cannot use issue events APIs, need to use issue comments API.
+    // Comments also include issue description for easier user settings, so send 2 request per repo.
     if (customCommented?.length) {
       let comments = [];
+      let newIssues = [];
       if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
         // fetch more issue comments if lastFetched is not set or when lastFetched is > 2 hours ago
         comments = await fetchNIssueComments(repoFullName, undefined, 60);
+        // fetch issue descriptions
+        newIssues = await fetchNIssues(repoFullName, undefined, 20);
       } else {
         // otherwise, fetch based on lastFetched time
         comments = await fetchNIssueComments(repoFullName, lastFetchedISO, 30);
+        // fetch issue descriptions
+        newIssues = await fetchNIssues(repoFullName, lastFetchedISO, 10);
       }
       logger.info(
         {
           lastFetchedISO,
+          repo: repoFullName,
           newUpdatedAt: getISO8601String(new Date(newUpdatedAt)),
           comments,
         },
@@ -75,6 +82,20 @@ export const fetchAndUpdate = async () => {
           link: html_url,
           body,
           user: user?.login,
+          updated_at,
+          filter: { match: customCommented },
+        });
+      }
+      for (const issue of newIssues) {
+        const { updated_at, html_url, number, title } = issue;
+        newEvents.push({
+          id: issue.id,
+          event: 'custom-commented',
+          repoFullName,
+          issueNumber: number,
+          link: html_url,
+          body: issue.body || '',
+          user: issue.user?.login || 'unknwon',
           updated_at,
           filter: { match: customCommented },
         });

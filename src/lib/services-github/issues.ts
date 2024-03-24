@@ -10,7 +10,7 @@ export async function fetchNIssues(
   const { data } = await octokit.request('GET /repos/{owner}/{repo}/issues', {
     owner: repoFullName.split('/')[0],
     repo: repoFullName.split('/')[1],
-    state: 'open', // can make this an option in future
+    // state: 'open',
     since,
     sort,
     page: 1,

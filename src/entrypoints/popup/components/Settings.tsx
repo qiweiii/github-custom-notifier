@@ -295,7 +295,7 @@ function RepoItem({
           <h5 style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             Commented {/* <span> */}
             <Tooltip
-              title={`Use * to match any text`}
+              title={`Match text in new issue description and comments. Use * to match any text`}
               arrow
               placement='top'
               sx={{
