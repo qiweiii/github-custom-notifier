@@ -67,7 +67,7 @@ function App() {
       <section>
         <h3 className='text-xl my-2'>Polling Interval</h3>
         <label>
-          Get data every{' '}
+          Fetch data every{' '}
           <input
             className='w-12 border text-sm rounded-md p-1.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500'
             type='number'
@@ -125,7 +125,7 @@ function App() {
 
       <hr className='my-5' />
 
-      {/* <section>
+      <section>
         <h3 className='text-xl'>Buy Me a Coffee!</h3>
         <p>
           If you like this extension, consider buying me a coffee. Your support will help me to continue maintaining
@@ -140,7 +140,7 @@ function App() {
         </a>
       </section>
 
-      <hr className='my-5' /> */}
+      <hr className='my-5' />
 
       <p>
         Please save and click on the "Github Custom Notifier" extension icon in the browser toolbar to configure which
