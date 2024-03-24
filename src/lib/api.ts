@@ -73,7 +73,7 @@ export const fetchAndUpdate = async () => {
       for (const comment of comments) {
         const { updated_at, body, html_url, user } = comment;
         // "html_url": "https://github.com/octocat/Hello-World/issues/1347#issuecomment-1",
-        const issueNumber = html_url.match(/\/issues\/(\d+)#issuecomment/)?.[1];
+        const issueNumber = html_url.match(/\/(issues|pull)\/(\d+)#issuecomment/)?.[2];
         newEvents.push({
           id: comment.id,
           event: 'custom-commented',
@@ -248,7 +248,7 @@ export const onCustomCommented = async (event: {
     link: link,
     issue: {
       number: parseInt(issueNumber),
-      title: 'Issue Number:',
+      title: 'Issue/PR Number:',
     },
   });
 };
