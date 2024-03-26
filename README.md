@@ -1,5 +1,12 @@
 
-> Too many unwanted GitHub issue or PR notifications? This web extension allows you to customize which GitHub Event to be notified.
+> Too many unwanted GitHub issue or PR notifications? Want more precise notifications? This web extension allows you to customize which GitHub Event to be notified.
+
+Use cases:
+
+- Get notified on specific labels: `good first issues`, `help-wanted`, `bug`, `feature`, etc.
+- Get notified when someone mentions `any user` in the issue or PR, not just yourself.
+- Get notified only when comment matched specific keywords.
+- and more...
 
 ## Dev
 
