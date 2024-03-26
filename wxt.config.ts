@@ -34,7 +34,7 @@ export default defineConfig({
     ],
     browser_specific_settings: {
       gecko: {
-        id: 'qwstudio0+gcn@gmail.com',
+        id: '{5a5c41da-afc4-4154-adcd-335fe5250b9d}',
       },
     },
   },
