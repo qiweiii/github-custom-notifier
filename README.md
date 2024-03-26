@@ -1,11 +1,18 @@
 
 > Too many unwanted GitHub issue or PR notifications? This web extension allows you to customize which GitHub Event to be notified.
 
+## Dev
+
+```shell
+pnpm install
+pnpm dev # auto open browser with hot reload
+```
+
 ## Build
 
 ```shell
 pnpm install
-pnpm build # for chrome
+pnpm build # build for chrome
 ```
 
 Open browser extension manager, turn on developer mode, load unpacked and add `.output/chrome-mv3`.
@@ -14,17 +21,19 @@ Open browser extension manager, turn on developer mode, load unpacked and add `.
 
 ### Notifications Updates
 
-<img src="./screenshots/updates.png" alt="Custom Notifications List" width="300"/>
+<img src="./screenshots/1280x800_updates.png" alt="Custom Notifications List" width="800"/>
 
 ### Configure Notifications
 
-<img src="./screenshots/settings.png" alt="Configure Custom Notifications" width="300"/>
+<img src="./screenshots/1280x800_settings.png" alt="Configure Custom Notifications" width="800"/>
 
 ### Options Page
 
-<img src="./screenshots/options.png" alt="Options Page" width="700"/>
+<img src="./screenshots/1280x800_options.png" alt="Options Page" width="1000"/>
 
 ## How to add a new notification event?
+
+Please refer to `src/lib/api` for examples.
 
 Contribution welcomed! You could create a PR to add a new event type to get notifications from.
 
