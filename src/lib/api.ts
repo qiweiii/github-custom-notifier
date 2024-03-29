@@ -44,13 +44,13 @@ export const fetchAndUpdate = async () => {
   for (const [repoFullName, repoSetting] of Object.entries(repos)) {
     const { labeled, mentioned, customCommented } = repoSetting;
 
-    // Comments is special, cannot use issue events APIs, need to use issue comments API.
+    // Comments are special, cannot use issue events APIs, need to use issue comments API.
     // Comments also include issue description for easier user settings, so send 2 request per repo.
     if (customCommented?.length) {
       let comments = [];
       let newIssues = [];
-      if (!lastFetched || newUpdatedAt - lastFetched > 2 * 60 * 60 * 1000) {
-        // fetch more issue comments if lastFetched is not set or when lastFetched is > 2 hours ago
+      if (!lastFetched || newUpdatedAt - lastFetched > 3 * 60 * 60 * 1000) {
+        // fetch more issue comments if lastFetched is not set or when lastFetched is > 3 hours ago
         comments = await fetchNIssueComments(repoFullName, undefined, 60);
         // fetch issue descriptions
         newIssues = await fetchNIssues(repoFullName, undefined, 20);
@@ -177,7 +177,7 @@ const scheduleNextFetch = async () => {
 };
 
 /**
- * Update cound on badge also trigger notification sound and desktop notification if needed.
+ * Update count on badge also trigger notification sound and desktop notification if needed.
  */
 const updateCount = async () => {
   const { unReadCount, hasUpdatesAfterLastFetchedTime, items } = await getUnreadInfo();
@@ -198,7 +198,7 @@ const updateCount = async () => {
       await palySoundDebounced();
     }
     if (showDesktopNotif) {
-      showNotifications(items);
+      await showNotifications(items);
     }
   }
 };
@@ -242,7 +242,7 @@ export const onCustomCommented = async (event: {
   await saveNotifyItemByRepo(repoFullName, {
     id: `issuecomment-${id}`,
     eventType,
-    reason: `@${user} commented: "${matched.length > 40 ? matched.slice(40) + '...' : matched}"`,
+    reason: `@${user} commented: "${matched.length > 40 ? matched.slice(0, 40) + '...' : matched}"`,
     createdAt: new Date(updated_at).getTime(),
     repoName: repoFullName,
     link: link,

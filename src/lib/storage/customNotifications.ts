@@ -86,6 +86,10 @@ export type NotifyItemV1 = {
 
 export type CustomNotificationsV1 = {
   lastFetched: number;
+  readItemIn24Hrs: {
+    id: string;
+    readAt: number;
+  }[];
   data: {
     [repoName: string]: {
       notifyItems: NotifyItemV1[];
@@ -96,6 +100,7 @@ export type CustomNotificationsV1 = {
 const customNotifications = storage.defineItem<CustomNotificationsV1>('local:customNotifications', {
   defaultValue: {
     lastFetched: 0,
+    readItemIn24Hrs: [],
     data: {},
   },
 });
@@ -105,11 +110,16 @@ const customNotifications = storage.defineItem<CustomNotificationsV1>('local:cus
  * Deduplication is handled in this functions, if item already exists then it will be replaced.
  */
 export const saveNotifyItemByRepo = async (repoName: string, notifyItem: NotifyItemV1) => {
-  const { data, lastFetched } = await customNotifications.getValue();
+  const { data, lastFetched, readItemIn24Hrs } = await customNotifications.getValue();
   if (!data[repoName]) {
     data[repoName] = {
       notifyItems: [],
     };
+  }
+
+  // marked read (removed) item in 24 hours should be ignored
+  if (readItemIn24Hrs.some((item) => item.id === notifyItem.id)) {
+    return;
   }
 
   // Deduplication
@@ -124,14 +134,14 @@ export const saveNotifyItemByRepo = async (repoName: string, notifyItem: NotifyI
   logger.info({ data }, `[storage:customNotifications] Saved notification item by repo: ${repoName}`);
 
   // Finally save
-  await customNotifications.setValue({ data, lastFetched });
+  await customNotifications.setValue({ data, lastFetched, readItemIn24Hrs });
 };
 
 /**
  * Remove notification item by id.
  */
 export const removeNotifyItemById = async (notifyItemId: string) => {
-  const { data } = await customNotifications.getValue();
+  const { data, readItemIn24Hrs } = await customNotifications.getValue();
   for (const repoName in data) {
     const notifyItems = data[repoName].notifyItems;
     const index = notifyItems.findIndex((item) => item.id === notifyItemId);
@@ -141,9 +151,12 @@ export const removeNotifyItemById = async (notifyItemId: string) => {
     }
   }
 
+  const updatedReadArray = readItemIn24Hrs.slice().filter((item) => item.readAt > Date.now() - 24 * 60 * 60 * 1000);
+  updatedReadArray.push({ id: notifyItemId, readAt: Date.now() });
+
   logger.info({ data }, `[storage:customNotifications] Removed notification item by id: ${notifyItemId}`);
 
-  await customNotifications.setValue({ data, lastFetched: Date.now() });
+  await customNotifications.setValue({ data, lastFetched: Date.now(), readItemIn24Hrs: updatedReadArray });
 
   // side effect to update unread cound on extension badge
   const { unReadCount } = await getUnreadInfo();

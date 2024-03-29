@@ -11,7 +11,7 @@ export default defineConfig({
   manifest: {
     name: 'GitHub Custom Notifier',
     short_name: 'GitHub Custom Notifier',
-    description: 'Allows you to customize which GitHub Event to be notified.',
+    description: 'Customize which GitHub Event to be notified.',
     homepage_url: 'https://github.com/qiweiii/github-custom-notifier',
     icons: {
       '16': 'icon/16.png',

@@ -53,7 +53,6 @@ export async function showNotifications(notifyItems: NotifyItemV1[]) {
     if (!existing) {
       await browser.notifications.create(notificationId, notificationObject);
       await storage.setItem(notificationId, notification);
-      await delay(50);
     }
   }
 }
