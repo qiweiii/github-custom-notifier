@@ -1,7 +1,7 @@
 {
   "name": "github-custom-notifier",
   "description": "Customize which GitHub Event to be notified",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "wxt",
