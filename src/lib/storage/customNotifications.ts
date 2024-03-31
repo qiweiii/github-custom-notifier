@@ -86,10 +86,12 @@ export type NotifyItemV1 = {
 
 export type CustomNotificationsV1 = {
   lastFetched: number;
-  readItemIn24Hrs: {
-    id: string;
-    readAt: number;
-  }[];
+  readItemIn24Hrs:
+    | {
+        id: string;
+        readAt: number;
+      }[]
+    | undefined;
   data: {
     [repoName: string]: {
       notifyItems: NotifyItemV1[];
@@ -118,7 +120,7 @@ export const saveNotifyItemByRepo = async (repoName: string, notifyItem: NotifyI
   }
 
   // marked read (removed) item in 24 hours should be ignored
-  if (readItemIn24Hrs.some((item) => item.id === notifyItem.id)) {
+  if (readItemIn24Hrs?.some((item) => item.id === notifyItem.id)) {
     return;
   }
 
@@ -151,7 +153,8 @@ export const removeNotifyItemById = async (notifyItemId: string) => {
     }
   }
 
-  const updatedReadArray = readItemIn24Hrs.slice().filter((item) => item.readAt > Date.now() - 24 * 60 * 60 * 1000);
+  const updatedReadArray =
+    readItemIn24Hrs?.slice().filter((item) => item.readAt > Date.now() - 24 * 60 * 60 * 1000) || [];
   updatedReadArray.push({ id: notifyItemId, readAt: Date.now() });
 
   logger.info({ data }, `[storage:customNotifications] Removed notification item by id: ${notifyItemId}`);
