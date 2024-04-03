@@ -1,7 +1,7 @@
 
 > Too many unwanted GitHub issue or PR notifications? Want more precise notifications? This web extension allows you to customize which GitHub Event to be notified.
 
-Download: [Chrome](https://chromewebstore.google.com/detail/github-custom-notifier/aelkipgppclpfimeamgmlonimflbhlgf) | [Firefix](https://addons.mozilla.org/en-US/firefox/addon/github-custom-notifier/)
+Download: [Chrome](https://chromewebstore.google.com/detail/github-custom-notifier/aelkipgppclpfimeamgmlonimflbhlgf) | [Firefox](https://addons.mozilla.org/en-US/firefox/addon/github-custom-notifier/) | Edge (in review)
 
 Use cases:
 - Get notified on specific labels: `good first issues`, `help-wanted`, `bug`, `feature`, etc.
