@@ -19,3 +19,9 @@ export async function queryTabs(urlList: string[]) {
 export async function openTab(url: string) {
   return createTab(url);
 }
+
+export function openTabs(urls: string[]) {
+  for (const url of urls) {
+    createTab(url);
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "github-custom-notifier",
   "description": "Customize which GitHub Event to be notified",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -37,7 +37,7 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
-    "wxt": "^0.17.7"
+    "wxt": "^0.19.10"
   },
   "pnpm": {
     "overrides": {

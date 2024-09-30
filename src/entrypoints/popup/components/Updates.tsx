@@ -5,7 +5,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 
-import { openTab } from '@/src/lib/services-ext';
+import { openTab, openTabs } from '@/src/lib/services-ext';
 import { removeNotifyItemById } from '@/src/lib/storage/customNotifications';
 import useNotifyItems from '@/src/lib/hooks/useNotifyItems';
 
@@ -23,6 +23,13 @@ const mapEventTypeToText: { [event: string]: string } = {
 
 export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => void }) {
   const notifyItems = useNotifyItems();
+
+  const openAll = async () => {
+    for (const item of notifyItems) {
+      await removeNotifyItemById(item.id);
+    }
+    openTabs(notifyItems.map((item) => item.link));
+  };
 
   return (
     <>
@@ -54,6 +61,9 @@ export default function Updates({ setTabIdx }: { setTabIdx: (idx: number) => voi
             overflowY: 'auto',
           }}
         >
+          <Button size='small' variant='contained' onClick={openAll}>
+            Open All
+          </Button>
           {notifyItems.map((item) => (
             <Box
               key={item.id}
