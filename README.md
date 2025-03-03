@@ -1,3 +1,5 @@
+[![](https://dcbadge.limes.pink/api/server/https://discord.gg/X5EK8m2ksN?style=flat)](https://discord.gg/INVITE)
+
 
 > Too many unwanted GitHub issue or PR notifications? Want more precise notifications? This web extension allows you to customize which GitHub Event to be notified.
 
