@@ -2,6 +2,11 @@ import { NotifyItemV1, removeNotifyItemById } from '../storage/customNotificatio
 import { queryPermission } from './permissions';
 import { openTab } from './tabs';
 
+type NotificationStorageKey = `local:${string}`;
+
+const toNotificationStorageKey = (notificationId: string): NotificationStorageKey =>
+  notificationId as NotificationStorageKey;
+
 /**
  * `storage` usage in this module is only for browser notifications.
  *
@@ -13,9 +18,10 @@ export async function closeNotification(notificationId: string) {
 }
 
 export async function openNotification(notificationId: string) {
-  const notifyItem = await storage.getItem<NotifyItemV1>(notificationId);
+  const storageKey = toNotificationStorageKey(notificationId);
+  const notifyItem = await storage.getItem<NotifyItemV1>(storageKey);
   await closeNotification(notificationId);
-  await removeNotification(notificationId);
+  await removeNotification(storageKey);
 
   // if notifyItem is already removed by click in extension popup, if will be null
   if (notifyItem) {
@@ -24,7 +30,7 @@ export async function openNotification(notificationId: string) {
   }
 }
 
-export async function removeNotification(notificationId: string) {
+export async function removeNotification(notificationId: NotificationStorageKey) {
   await storage.removeItem(notificationId);
 }
 
@@ -45,7 +51,7 @@ export async function showNotifications(notifyItems: NotifyItemV1[]) {
   }
 
   for (const notification of notifyItems) {
-    const notificationId = `local:GH-CUSTOM-NOTIFIER-${notification.id}`;
+    const notificationId = `local:GH-CUSTOM-NOTIFIER-${notification.id}` as NotificationStorageKey;
     const notificationObject = getNotificationObject(notification);
 
     const existing = await storage.getItem<NotifyItemV1>(notificationId);
