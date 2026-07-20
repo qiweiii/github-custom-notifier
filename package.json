@@ -1,8 +1,9 @@
 {
   "name": "github-custom-notifier",
   "description": "Customize which GitHub Event to be notified",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
+  "packageManager": "pnpm@11.5.1",
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox --mv3",
@@ -21,7 +22,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^5.18.0",
     "@mui/material": "^5.18.0",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "octokit": "^5.0.5",
     "pino": "^8.18.0",
     "react": "^18.2.0",
@@ -32,23 +33,11 @@
     "@types/lodash": "^4.17.24",
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.8",
+    "postcss": "^8.5.10",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
-    "wxt": "^0.20.20"
-  },
-  "pnpm": {
-    "overrides": {
-      "vite@>=5.1.0 <=5.1.6": ">=5.1.7",
-      "tar@<6.2.1": ">=6.2.1",
-      "ws@>=8.0.0 <8.17.1": ">=8.17.1",
-      "braces@<3.0.3": ">=3.0.3",
-      "cross-spawn": ">=7.0.5",
-      "glob": ">=10.5.0",
-      "micromatch": ">=4.0.8",
-      "rollup": ">=4.59.0"
-    }
+    "wxt": "^0.20.26"
   }
 }
